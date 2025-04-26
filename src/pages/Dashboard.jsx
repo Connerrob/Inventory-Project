@@ -88,7 +88,7 @@ const Dashboard = () => {
     if (!selectedAsset?.id) return;
     const assetRef = doc(db, 'assets', selectedAsset.id);
 
-    await logAction('delete', { oldItem: selectedAsset });
+    await logAction('delete', { ...selectedAsset });
     await deleteDoc(assetRef);
     setAssets((prev) => prev.filter((a) => a.id !== selectedAsset.id));
 
