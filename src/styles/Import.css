@@ -37,14 +37,14 @@
   padding: 10px;
   margin: 10px 0;
   border-radius: 4px;
-  border: 1px solid var(--border-color); /* Use --border-color */
-  background-color: var(--background); /* Use --background */
-  color: var(--text); /* Use --text */
+  border: 1px solid var(--border-color); 
+  background-color: var(--background);
+  color: var(--text);
   font-size: 1rem;
 }
 
 .file-input:hover {
-  background-color: var(--primary); /* Use --primary */
+  background-color: var(--primary);
   cursor: pointer;
 }
 
@@ -53,7 +53,7 @@
   width: 60%;
   margin: 20px auto;
   padding: 10px 20px;
-  background-color: var(--accent); /* Use --accent */
+  background-color: var(--accent);
   color: #fff;
   font-size: 1rem;
   border-radius: 4px;
@@ -63,12 +63,12 @@
 }
 
 .download-template-btn:hover {
-  background-color: #45a049; /* You can update this with a more consistent green */
+  background-color: #45a049; 
 }
 
 .download-template-btn:focus {
   outline: none;
-  box-shadow: 0 0 10px var(--accent); /* Use --accent */
+  box-shadow: 0 0 10px var(--accent);
 }
 
 @media (max-width: 768px) {

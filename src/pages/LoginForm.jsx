@@ -22,7 +22,7 @@ const LoginForm = () => {
 
     try {
       // Lookup email from Firestore
-      const userRef = doc(db, "users", username.toLowerCase()); // use lowercase to avoid mistakes
+      const userRef = doc(db, "users", username.toLowerCase());
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
@@ -32,7 +32,6 @@ const LoginForm = () => {
 
       const { email } = userSnap.data();
 
-      // Try logging in with the email and password
       await signInWithEmailAndPassword(auth, email, password);
       console.log("Login successful");
       navigate("/dashboard");

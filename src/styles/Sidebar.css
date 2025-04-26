@@ -5,8 +5,8 @@
   left: 0;
   width: 20%;
   height: 100vh;
-  background-color: var(--background); /* Use --background */
-  color: var(--text); /* Use --text */
+  background-color: var(--background);
+  color: var(--text);
   padding-top: 1.5rem;
   transition: width 0.3s ease;
   z-index: 1000;
@@ -26,7 +26,7 @@
 }
 
 .sidebar .nav-link {
-  color: var(--secondary); /* Use --secondary */
+  color: var(--secondary);
   padding: 14px 20px;
   display: flex;
   align-items: center;
@@ -43,8 +43,8 @@
 }
 
 .sidebar .nav-link:hover {
-  background-color: var(--primary); /* Use --primary */
-  color: var(--text); /* Use --text */
+  background-color: var(--primary);
+  color: var(--text);
 }
 
 .sidebar.collapsed .nav-link {
@@ -60,7 +60,7 @@
 .sidebar button {
   background: none;
   border: none;
-  color: var(--secondary); /* Use --secondary */
+  color: var(--secondary);
   font-size: 1.4rem;
   padding: 10px 20px;
   cursor: pointer;
@@ -77,12 +77,12 @@
 }
 
 .sidebar button:hover {
-  color: var(--text); /* Use --text */
+  color: var(--text);
 }
 
 .sidebar .nav-link.active {
-  background-color: var(--border-color); /* Use --border-color */
-  color: var(--text); /* Use --text */
+  background-color: var(--border-color);
+  color: var(--text);
   border-left: 4px solid var(--accent, #4CAF50);
   font-weight: 500;
   padding-left: 5px;
@@ -91,8 +91,8 @@
 }
 
 .sidebar.collapsed .nav-link.active {
-  background-color: var(--border-color); /* Use --border-color */
-  color: var(--text); /* Use --text */
+  background-color: var(--border-color);
+  color: var(--text);
   border-left: 4px solid var(--accent, #4CAF50);
   font-weight: 500;
 }

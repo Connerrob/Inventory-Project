@@ -16,7 +16,7 @@ const Import = () => {
   const toggleSidebar = () => setCollapsed(!collapsed);
 
   const downloadTemplate = () => {
-    const csvHeaders = ['Item Name', 'Category', 'Description', 'Quantity'];
+    const csvHeaders = ['Service Tag', 'Model', 'Category', 'Status', 'Location', 'Notes', 'Mac Address', 'Decal'];
     const csvContent = [csvHeaders.join(',')].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -42,16 +42,16 @@ const Import = () => {
         complete: async (results) => {
           const parsedData = results.data;
           const validItems = parsedData.filter(item =>
-            item['Item Name'] && item['Category'] && item['Description'] && item['Quantity']
+            item['Service Tag'] && item['Model'] && item['Category'] && item['Status'] && item['Location'] && item['Notes'] && item['Mac Address'] && item['Decal']
           );
 
           let addedCount = 0;
           let updatedCount = 0;
 
           for (const item of validItems) {
-            const itemName = item['Item Name'].trim();
+            const serviceTag = item['Service Tag'].trim();
 
-            const q = query(collection(db, 'assets'), where('name', '==', itemName));
+            const q = query(collection(db, 'assets'), where('serviceTag', '==', serviceTag));
             const snapshot = await getDocs(q);
 
             if (!snapshot.empty) {
@@ -59,30 +59,42 @@ const Import = () => {
               const existingItem = snapshot.docs[0].data();
 
               const hasChanged =
+                existingItem.model !== item['Model'] ||
                 existingItem.category !== item['Category'] ||
-                existingItem.description !== item['Description'] ||
-                Number(existingItem.quantity) !== Number(item['Quantity']);
+                existingItem.status !== item['Status'] ||
+                existingItem.location !== item['Location'] ||
+                existingItem.notes !== item['Notes'] ||
+                existingItem.macAddress !== item['Mac Address'] ||
+                existingItem.decal !== item['Decal'];
 
               if (hasChanged) {
                 const updatedItem = {
-                  name: itemName,
+                  serviceTag,
+                  model: item['Model'],
                   category: item['Category'],
-                  description: item['Description'],
-                  quantity: Number(item['Quantity']),
+                  status: item['Status'],
+                  location: item['Location'],
+                  notes: item['Notes'],
+                  macAddress: item['Mac Address'],
+                  decal: item['Decal'],
                 };
 
                 await updateDoc(docRef, updatedItem);
                 await logAction('edit', { oldItem: existingItem, newItem: updatedItem });
                 updatedCount++;
               } else {
-                console.log(`No changes for ${itemName}, skipping`);
+                console.log(`No changes for ${serviceTag}, skipping`);
               }
             } else {
               const newItem = {
-                name: itemName,
+                serviceTag,
+                model: item['Model'],
                 category: item['Category'],
-                description: item['Description'],
-                quantity: Number(item['Quantity']),
+                status: item['Status'],
+                location: item['Location'],
+                notes: item['Notes'],
+                macAddress: item['Mac Address'],
+                decal: item['Decal'],
               };
 
               await addDoc(collection(db, 'assets'), newItem);
@@ -113,7 +125,7 @@ const Import = () => {
               className="file-input"
             />
             <p className="file-instruction">
-              Upload a CSV file with columns: <strong>Item Name, Category, Description, Quantity</strong>
+              Upload a CSV file with columns: <strong>Service Tag, Model, Category, Status, Location, Notes, Mac Address, Decal</strong>
             </p>
           </div>
           

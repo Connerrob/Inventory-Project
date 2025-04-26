@@ -1,17 +1,16 @@
-/* Reports table styling */
 .styled-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  background-color: var(--background); /* Use --background */
-  color: var(--text); /* Use --text */
+  background-color: var(--background);
+  color: var(--text);
 }
 
 .styled-table th,
 .styled-table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color); /* Use --border-color */
+  border-bottom: 1px solid var(--border-color);
   word-wrap: break-word;
 }
 
@@ -28,7 +27,6 @@
   position: relative;
 }
 
-/* Optional: Add a subtle text-shadow for more contrast */
 .styled-table th::after {
   content: "";
   position: absolute;
@@ -36,7 +34,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: var(--accent); /* Use --accent */
+  background: var(--accent);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -49,7 +47,7 @@
   max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--secondary); /* Use --secondary */
+  color: var(--secondary); 
 }
 
 /* Pagination */
@@ -62,45 +60,45 @@
 .pagination button {
   margin: 0 5px;
   padding: 6px 14px;
-  border: 1px solid var(--border-color); /* Use --border-color */
-  background-color: var(--background); /* Use --background */
-  color: var(--text); /* Use --text */
+  border: 1px solid var(--border-color); 
+  background-color: var(--background);
+  color: var(--text);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   border-radius: 4px;
 }
 
 .pagination button.active-page {
-  background-color: var(--accent); /* Use --accent */
-  color: var(--text); /* Use --text */
+  background-color: var(--accent);
+  color: var(--text);
   font-weight: bold;
 }
 
 .pagination button.page-number {
-  background-color: var(--background); /* Use --background */
-  border: 1px solid var(--border-color); /* Use --border-color */
+  background-color: var(--background);
+  border: 1px solid var(--border-color);
   padding: 8px 14px;
   font-size: 1rem;
   border-radius: 4px;
-  color: var(--text); /* Use --text */
+  color: var(--text);
   transition: background-color 0.3s ease;
 }
 
 .pagination button.page-number.active-page {
-  background-color: var(--accent); /* Use --accent */
-  color: var(--text); /* Use --text */
+  background-color: var(--accent);
+  color: var(--text);
   font-weight: bold;
 }
 
 .pagination button.page-number:hover {
-  background-color: var(--primary); /* Use --primary */
-  color: var(--text); /* Use --text */
+  background-color: var(--primary);
+  color: var(--text);
   transform: scale(1.05);
 }
 
 .pagination .ellipsis {
   font-weight: bold;
-  color: var(--text); /* Use --text */
+  color: var(--text);
   margin: 0 10px;
 }
 
@@ -129,7 +127,7 @@
   padding-right: 12%;
   flex-direction: column;
   height: 100vh;
-  background-color: var(--background); /* Use --background */
+  background-color: var(--background);
 }
 
 .reports-content {
@@ -140,7 +138,7 @@
 
 .section-title {
   font-size: 1.8rem;
-  color: var(--text); /* Use --text */
+  color: var(--text);
   margin-bottom: 20px;
   font-weight: bold;
 }

@@ -23,7 +23,7 @@ const Reports = () => {
           ...doc.data(),
         }));
 
-        // Sort logs by Firestore timestamp (newest first)
+        // Sort logs by timestamp (newest first)
         logsList.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
 
         setLogs(logsList);
@@ -41,6 +41,23 @@ const Reports = () => {
       dateStyle: 'medium',
       timeStyle: 'short',
     });
+  };
+
+  const formatFieldName = (field) => {
+    const fieldNames = {
+      serviceTag: 'Service Tag',
+      model: 'Model',
+      status: 'Status',
+      location: 'Location',
+      notes: 'Notes',
+      macAddress: 'MAC Address',
+      name: 'Item Name',
+      category: 'Category',
+      description: 'Description',
+      quantity: 'Quantity',
+      decal: 'Decal',
+    };
+    return fieldNames[field] || field;
   };
 
   const indexOfLastLog = currentPage * logsPerPage;
@@ -74,12 +91,12 @@ const Reports = () => {
                     {currentLogs.map((log, index) => (
                       <tr key={index}>
                         <td>{log.actionType}</td>
-                        <td>{log.assetName}</td>
+                        <td>{log.assetName || log.serviceTag || 'Unknown'}</td>
                         <td>
                           {log.changes && Object.keys(log.changes).length > 0 ? (
                             Object.entries(log.changes).map(([field, change], i) => (
                               <div key={i} className="change-item">
-                                <strong>{field}:</strong> {change.from} → {change.to}
+                                <strong>{formatFieldName(field)}:</strong> {change.from} → {change.to}
                               </div>
                             ))
                           ) : log.changes === null ? (

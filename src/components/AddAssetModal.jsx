@@ -20,17 +20,32 @@ const AddAssetModal = ({
         <Form>
           <Row>
             <Col md={6}>
-              <Form.Group controlId="formAssetName" className="mb-3">
-                <Form.Label>Asset Name</Form.Label>
+              <Form.Group controlId="formServiceTag" className="mb-3">
+                <Form.Label>Service Tag</Form.Label>
                 <Form.Control
                   type="text"
-                  name="name"
-                  value={selectedAsset?.name || ''}
+                  name="serviceTag"
+                  value={selectedAsset?.serviceTag || ''}
                   onChange={onChange}
-                  placeholder="Enter asset name"
+                  placeholder="Enter service tag"
                 />
               </Form.Group>
             </Col>
+            <Col md={6}>
+              <Form.Group controlId="formModel" className="mb-3">
+                <Form.Label>Model</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="model"
+                  value={selectedAsset?.model || ''}
+                  onChange={onChange}
+                  placeholder="Enter model"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Row>
             <Col md={6}>
               <Form.Group controlId="formCategory" className="mb-3">
                 <Form.Label>Category</Form.Label>
@@ -39,7 +54,19 @@ const AddAssetModal = ({
                   name="category"
                   value={selectedAsset?.category || ''}
                   onChange={onChange}
-                  placeholder="Enter asset category"
+                  placeholder="Enter category"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group controlId="formStatus" className="mb-3">
+                <Form.Label>Status</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="status"
+                  value={selectedAsset?.status || ''}
+                  onChange={onChange}
+                  placeholder="Enter status"
                 />
               </Form.Group>
             </Col>
@@ -47,47 +74,58 @@ const AddAssetModal = ({
 
           <Row>
             <Col md={6}>
-              <Form.Group controlId="formDescription" className="mb-3">
-                <Form.Label>Description</Form.Label>
+              <Form.Group controlId="formNotes" className="mb-3">
+                <Form.Label>Notes</Form.Label>
                 <Form.Control
                   type="text"
-                  name="description"
-                  value={selectedAsset?.description || ''}
+                  name="notes"
+                  value={selectedAsset?.notes || ''}
                   onChange={onChange}
-                  placeholder="Enter asset description"
+                  placeholder="Enter notes"
                 />
               </Form.Group>
             </Col>
             <Col md={6}>
-              <Form.Group controlId="formQuantity" className="mb-3">
-                <Form.Label>Quantity</Form.Label>
+              <Form.Group controlId="formMacAddress" className="mb-3">
+                <Form.Label>MAC Address</Form.Label>
                 <Form.Control
-                  type="number"
-                  name="quantity"
-                  value={selectedAsset?.quantity || ''}
+                  type="text"
+                  name="macAddress"
+                  value={selectedAsset?.macAddress || ''}
                   onChange={onChange}
-                  placeholder="Enter quantity"
+                  placeholder="Enter MAC address"
                 />
               </Form.Group>
             </Col>
           </Row>
 
-          {isAdding && (
-            <Row>
-              <Col md={12}>
-                <Form.Group controlId="formLocation" className="mb-3">
-                  <Form.Label>Location</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="location"
-                    value={selectedAsset?.location || ''}
-                    onChange={onChange}
-                    placeholder="Enter asset location"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-          )}
+          <Row>
+            <Col md={6}>
+              <Form.Group controlId="formDecal" className="mb-3">
+                <Form.Label>Decal</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="decal"
+                  value={selectedAsset?.decal || ''}
+                  onChange={onChange}
+                  placeholder="Enter decal"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group controlId="formLocation" className="mb-3">
+                <Form.Label>Location</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="location"
+                  value={selectedAsset?.location || ''}
+                  onChange={onChange}
+                  placeholder="Enter location"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
         </Form>
       </Modal.Body>
 

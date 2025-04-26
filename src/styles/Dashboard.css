@@ -74,7 +74,7 @@
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  overflow-x: auto; /* Just in case you have lots of columns */
+  overflow-x: auto;
 }
 
 .table-container table {
@@ -176,6 +176,21 @@
 .add-button:hover {
   background-color: var(--button-hover);
   transition: background-color 0.3s ease;
+}
+
+.filter-button {
+  margin-top: 15px;
+  margin-bottom: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.filter-button:hover {
+  background-color: #0056b3;
 }
 
 .pagination {

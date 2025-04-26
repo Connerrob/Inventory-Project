@@ -1,35 +1,35 @@
 .navbar-custom {
   width: 100%;
-  background-color: var(--background); /* Use --background */
+  background-color: var(--background);
   color: var(--text);
   padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border-color); /* Use --border-color */
+  border-bottom: 1px solid var(--border-color);
 }
 
 .navbar-brand-text {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text); /* Use --text */
+  color: var(--text);
   margin-right: 24px;
 }
 
 .search-input {
   width: 100%;
   padding: 8px 16px;
-  background-color: var(--secondary); /* Use --secondary for the search input background */
-  color: var(--text); /* Use --text for the font color */
-  border: 1px solid var(--border-color); /* Use --border-color */
+  background-color: var(--secondary); 
+  color: var(--text);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   outline: none;
 }
 
 .search-input::placeholder {
-  color: var(--secondary); /* Use --secondary for placeholder text */
+  color: var(--secondary);
 }
 
 .search-input:focus {
-  border-color: var(--accent); /* Use --accent for the focus border color */
+  border-color: var(--accent); 
 }

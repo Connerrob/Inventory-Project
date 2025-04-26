@@ -3,7 +3,8 @@ import { db } from './firebase';
 
 export const logAction = async (actionType, itemData) => {
   try {
-    const assetName = itemData?.name || 'Unknown';
+    const assetName = itemData?.serviceTag || itemData?.name || 'Unknown'; 
+
     const logEntry = {
       actionType,
       assetName,
@@ -11,7 +12,7 @@ export const logAction = async (actionType, itemData) => {
     };
 
     if (actionType === 'edit' && itemData.oldItem && itemData.newItem) {
-      logEntry.assetName = itemData.newItem.name || itemData.oldItem.name || 'Unknown';
+      logEntry.assetName = itemData.newItem.serviceTag || itemData.newItem.name || itemData.oldItem.serviceTag || itemData.oldItem.name || 'Unknown'; // ✅ updated
       logEntry.changes = getChanges(itemData.oldItem, itemData.newItem);
     }
 
