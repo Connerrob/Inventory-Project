@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { db } from '../firebase';
 import Sidebar from '../components/Sidebar';
 import { Container, Row, Col, Table, Alert } from 'react-bootstrap';
+import Pagination from '../components/Pagination';
 import '../styles/Reports.css';
 
 const Reports = () => {
@@ -18,12 +19,19 @@ const Reports = () => {
     const fetchLogs = async () => {
       try {
         const logsSnapshot = await getDocs(collection(db, 'assetLogs'));
-        const logsList = logsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const logsList = [];
 
-        // Sort logs by timestamp (newest first)
+        for (const doc of logsSnapshot.docs) {
+          const logData = doc.data();
+          const userDoc = logData.user ? logData.user : 'Unknown';
+
+          logsList.push({
+            id: doc.id,
+            ...logData,
+            user: userDoc,
+          });
+        }
+
         logsList.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
 
         setLogs(logsList);
@@ -65,6 +73,10 @@ const Reports = () => {
   const currentLogs = logs.slice(indexOfFirstLog, indexOfLastLog);
   const totalPages = Math.ceil(logs.length / logsPerPage);
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <Container fluid className="reports-container">
       <Row>
@@ -85,6 +97,7 @@ const Reports = () => {
                       <th>Item</th>
                       <th>Changes</th>
                       <th>Timestamp</th>
+                      <th>User</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -106,65 +119,17 @@ const Reports = () => {
                           )}
                         </td>
                         <td>{formatTimestamp(log.timestamp)}</td>
+                        <td>{log.user || 'Unknown'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </Table>
 
-                <div className="pagination">
-                  {totalPages <= 10 ? (
-                    Array.from({ length: totalPages }, (_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentPage(index + 1)}
-                        className={currentPage === index + 1 ? 'active-page' : ''}
-                        aria-label={`Go to page ${index + 1}`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => setCurrentPage(1)}
-                        className={currentPage === 1 ? 'active-page' : ''}
-                        aria-label="Go to first page"
-                      >
-                        1
-                      </button>
-
-                      {currentPage > 6 && <span className="ellipsis">...</span>}
-
-                      {Array.from({ length: totalPages }, (_, i) => i + 1)
-                        .filter(page =>
-                          page !== 1 &&
-                          page !== totalPages &&
-                          page >= currentPage - 4 &&
-                          page <= currentPage + 4
-                        )
-                        .map(page => (
-                          <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={currentPage === page ? 'active-page' : ''}
-                            aria-label={`Go to page ${page}`}
-                          >
-                            {page}
-                          </button>
-                        ))}
-
-                      {currentPage < totalPages - 5 && <span className="ellipsis">...</span>}
-
-                      <button
-                        onClick={() => setCurrentPage(totalPages)}
-                        className={currentPage === totalPages ? 'active-page' : ''}
-                        aria-label="Go to last page"
-                      >
-                        {totalPages}
-                      </button>
-                    </>
-                  )}
-                </div>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </>
             )}
           </div>

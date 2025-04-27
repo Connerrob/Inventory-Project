@@ -1,18 +1,23 @@
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import { getAuth } from 'firebase/auth';
 
 export const logAction = async (actionType, itemData) => {
   try {
-    const assetName = itemData?.serviceTag || itemData?.name || 'Unknown'; 
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    const assetName = itemData?.serviceTag || itemData?.name || 'Unknown';
 
     const logEntry = {
       actionType,
       assetName,
+      user: user ? (user.displayName || user.email) : 'Unknown',
       timestamp: Timestamp.now(),
     };
 
     if (actionType === 'edit' && itemData.oldItem && itemData.newItem) {
-      logEntry.assetName = itemData.newItem.serviceTag || itemData.newItem.name || itemData.oldItem.serviceTag || itemData.oldItem.name || 'Unknown'; // ✅ updated
+      logEntry.assetName = itemData.newItem.serviceTag || itemData.newItem.name || itemData.oldItem.serviceTag || itemData.oldItem.name || 'Unknown';
       logEntry.changes = getChanges(itemData.oldItem, itemData.newItem);
     }
 

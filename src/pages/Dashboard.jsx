@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc, deleteDoc, addDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, deleteDoc, addDoc } from 'firebase/firestore';
 import Sidebar from '../components/Sidebar';
 import NavbarComponent from '../components/Navbar';
 import AssetTable from '../components/Table';
 import AddAssetModal from '../components/AddAssetModal';
 import FilterModal from '../components/FilterModal';
 import { logAction } from '../utils';
+import Pagination from '../components/Pagination';
 import '../styles/Dashboard.css';
 
 const Dashboard = () => {
@@ -105,19 +106,28 @@ const Dashboard = () => {
     setCurrentPage(1);
   };
 
-  const filteredAssets = assets.filter((asset) => {
-    return Object.keys(filters).every((key) => {
-      if (key === 'status' && filters[key]) {
-        return asset[key].toLowerCase() === filters[key].toLowerCase();
+  const filteredAssets = assets
+    .filter((asset) => {
+      if (searchQuery) {
+        return Object.values(asset).some((value) =>
+          value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+        );
       }
+      return true;
+    })
+    .filter((asset) => {
+      return Object.keys(filters).every((key) => {
+        if (key === 'status' && filters[key]) {
+          return asset[key]?.toLowerCase() === filters[key].toLowerCase();
+        }
 
-      if (filters[key] && asset[key]) {
-        return asset[key].toLowerCase().includes(filters[key].toLowerCase());
-      }
+        if (filters[key] && asset[key]) {
+          return asset[key]?.toLowerCase().includes(filters[key].toLowerCase());
+        }
 
-      return !filters[key] || !asset[key];
+        return !filters[key] || !asset[key];
+      });
     });
-  });
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -159,61 +169,11 @@ const Dashboard = () => {
               Filter
             </Button>
 
-            <div className="pagination">
-              {totalPages > 10 ? (
-                <>
-                  <button
-                    onClick={() => setCurrentPage(1)}
-                    className={currentPage === 1 ? 'active-page' : ''}
-                    aria-label="Go to first page"
-                  >
-                    1
-                  </button>
-
-                  {currentPage > 6 && <span className="ellipsis">...</span>}
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(
-                      (page) =>
-                        page !== 1 &&
-                        page !== totalPages &&
-                        page >= currentPage - 4 &&
-                        page <= currentPage + 4
-                    )
-                    .map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={currentPage === page ? 'active-page' : ''}
-                        aria-label={`Go to page ${page}`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-
-                  {currentPage < totalPages - 5 && <span className="ellipsis">...</span>}
-
-                  <button
-                    onClick={() => setCurrentPage(totalPages)}
-                    className={currentPage === totalPages ? 'active-page' : ''}
-                    aria-label="Go to last page"
-                  >
-                    {totalPages}
-                  </button>
-                </>
-              ) : (
-                Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handlePageChange(index + 1)}
-                    className={currentPage === index + 1 ? 'active-page' : ''}
-                    aria-label={`Go to page ${index + 1}`}
-                  >
-                    {index + 1}
-                  </button>
-                ))
-              )}
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
 
             <Button
               className="add-button"

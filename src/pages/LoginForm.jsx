@@ -21,7 +21,6 @@ const LoginForm = () => {
     }
 
     try {
-      // Lookup email from Firestore
       const userRef = doc(db, "users", username.toLowerCase());
       const userSnap = await getDoc(userRef);
 
