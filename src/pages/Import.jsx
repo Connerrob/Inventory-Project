@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, addDoc, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
 import { logAction } from '../utils';
 import Papa from 'papaparse';
 import Sidebar from '../components/Sidebar';
 import AddAssetModal from '../components/AddAssetModal';
+import ImportModal from '../components/ImportModal';
 import '../styles/Import.css';
 
-const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
+const Import = ({ handleSignOut }) => {
   const [collapsed, setCollapsed] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [importedCount, setImportedCount] = useState(0);
+  const [updatedCount, setUpdatedCount] = useState(0);
   const location = useLocation();
 
   const toggleSidebar = () => setCollapsed(!collapsed);
@@ -28,12 +35,18 @@ const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
     document.body.removeChild(link);
   };
 
-  const handleFileUpload = async (event) => {
+  const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    const confirmImport = window.confirm(`Are you sure you want to import "${file.name}"?`);
-    if (!confirmImport) return;
+    setSelectedFile(file);
+    setShowImportModal(true); // Open confirmation
+  };
 
+  const processFile = async () => {
+    if (!selectedFile) return;
+  
+    setLoading(true);
+  
     const reader = new FileReader();
     reader.onload = async (e) => {
       Papa.parse(e.target.result, {
@@ -42,31 +55,32 @@ const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
         complete: async (results) => {
           const parsedData = results.data;
           const validItems = parsedData.filter(item =>
-            item['Service Tag'] && item['Model'] && item['Category'] && item['Status'] && item['Location'] && item['Notes'] && item['Mac Address'] && item['Decal']
+            item['Service Tag'] && item['Model'] && item['Category'] && item['Status'] &&
+            item['Location'] && item['Notes'] && item['Mac Address'] && item['Decal']
           );
-
+  
           let addedCount = 0;
           let updatedCount = 0;
-
+  
           for (const item of validItems) {
             const serviceTag = item['Service Tag'].trim();
-
             const q = query(collection(db, 'assets'), where('serviceTag', '==', serviceTag));
             const snapshot = await getDocs(q);
-
+  
             if (!snapshot.empty) {
               const docRef = snapshot.docs[0].ref;
               const existingItem = snapshot.docs[0].data();
-
-              const hasChanged =
+  
+              const hasChanged = (
                 existingItem.model !== item['Model'] ||
                 existingItem.category !== item['Category'] ||
                 existingItem.status !== item['Status'] ||
                 existingItem.location !== item['Location'] ||
                 existingItem.notes !== item['Notes'] ||
                 existingItem.macAddress !== item['Mac Address'] ||
-                existingItem.decal !== item['Decal'];
-
+                existingItem.decal !== item['Decal']
+              );
+  
               if (hasChanged) {
                 const updatedItem = {
                   serviceTag,
@@ -78,12 +92,9 @@ const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
                   macAddress: item['Mac Address'],
                   decal: item['Decal'],
                 };
-
                 await updateDoc(docRef, updatedItem);
                 await logAction('edit', { oldItem: existingItem, newItem: updatedItem });
                 updatedCount++;
-              } else {
-                console.log(`No changes for ${serviceTag}, skipping`);
               }
             } else {
               const newItem = {
@@ -96,20 +107,27 @@ const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
                 macAddress: item['Mac Address'],
                 decal: item['Decal'],
               };
-
               await addDoc(collection(db, 'assets'), newItem);
               await logAction('Imported', newItem);
               addedCount++;
             }
           }
-
-          alert(`${addedCount} item(s) imported and ${updatedCount} item(s) updated!`);
+  
+          setImportedCount(addedCount);
+          setUpdatedCount(updatedCount); 
+          setLoading(false);
+          setIsSuccess(true);
+  
+          setSelectedFile(null);
+          document.querySelector('.file-input').value = '';
+  
         }
       });
     };
-
-    reader.readAsText(file);
+  
+    reader.readAsText(selectedFile);
   };
+  
 
   return (
     <div className="import-container-wrapper">
@@ -117,7 +135,7 @@ const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
         collapsed={collapsed} 
         toggleSidebar={toggleSidebar} 
         location={location} 
-        handleSignOut={handleSignOut}  // Pass handleSignOut to Sidebar
+        handleSignOut={handleSignOut} 
       />
       <div className={`import-content ${collapsed ? 'collapsed' : ''}`}>
         <div className="import-content-wrapper">
@@ -133,14 +151,31 @@ const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
               Upload a CSV file with columns: <strong>Service Tag, Model, Category, Status, Location, Notes, Mac Address, Decal</strong>
             </p>
           </div>
-          
           <button onClick={downloadTemplate} className="download-template-btn">
             Download CSV Template
           </button>
-
-          <AddAssetModal showModal={showModal} closeModal={() => setShowModal(false)} />
         </div>
       </div>
+
+      <ImportModal
+        show={showImportModal}
+        onConfirm={processFile}
+        onCancel={() => { 
+          setShowImportModal(false); 
+          setSelectedFile(null); 
+          setIsSuccess(false); 
+          setImportedCount(0);
+          setUpdatedCount(0);
+          setLoading(false);
+        }}
+        fileName={selectedFile?.name || ''}
+        loading={loading}
+        isSuccess={isSuccess}
+        importedCount={importedCount}
+        updatedCount={updatedCount}
+      />
+
+      <AddAssetModal showModal={showModal} closeModal={() => setShowModal(false)} />
     </div>
   );
 };

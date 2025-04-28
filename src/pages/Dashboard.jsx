@@ -11,7 +11,7 @@ import EditAssetModal from '../components/EditAssetModal';
 import FilterModal from '../components/FilterModal';
 import { logAction } from '../utils';
 import Pagination from '../components/Pagination';
-import ConfirmationModal from '../components/ConfirmationModal'; // Import ConfirmationModal
+import ConfirmationModal from '../components/ConfirmationModal';
 import '../styles/Dashboard.css';
 
 const Dashboard = ({ handleSignOut }) => {

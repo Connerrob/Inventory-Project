@@ -1,28 +1,27 @@
-/* General Import Page Styling */
 .import-container-wrapper {
   display: flex;
   height: 100vh;
-  background-color: var(--background); /* Use --background */
+  background-color: var(--background);
 }
 
 .import-content {
   flex-grow: 1;
   padding: 20px;
-  background-color: var(--background); /* Use --background */
+  background-color: var(--background); 
 }
 
 .import-content-wrapper {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #fff; /* You can adjust this if you want it to follow a darker theme */
+  background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .import-content h2 {
   font-size: 2rem;
-  color: var(--text); /* Use --text */
+  color: var(--text);
   margin-bottom: 20px;
   text-align: center;
 }
@@ -88,3 +87,98 @@
     width: 80%;
   }
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--background);
+  padding: 30px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.modal-message {
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 25px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.confirm-btn, .cancel-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.confirm-btn {
+  background-color: var(--accent);
+  color: white;
+}
+
+.confirm-btn:hover {
+  background-color: #45a049;
+}
+
+.cancel-btn {
+  background-color: #ccc;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #b3b3b3;
+}
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background-color: var(--accent);
+  animation: loadingAnimation 2s infinite linear;
+}
+
+@keyframes loadingAnimation {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 75%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+

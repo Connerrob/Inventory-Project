@@ -7,7 +7,7 @@ import { Container, Row, Col, Table, Alert } from 'react-bootstrap';
 import Pagination from '../components/Pagination';
 import '../styles/Reports.css';
 
-const Reports = ({ handleSignOut }) => {  // Added handleSignOut as a prop
+const Reports = ({ handleSignOut }) => { 
   const [collapsed, setCollapsed] = useState(true);
   const [logs, setLogs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -85,7 +85,7 @@ const Reports = ({ handleSignOut }) => {  // Added handleSignOut as a prop
             collapsed={collapsed}
             toggleSidebar={() => setCollapsed(!collapsed)}
             location={location}
-            handleSignOut={handleSignOut}  // Pass handleSignOut to Sidebar
+            handleSignOut={handleSignOut}
           />
         </Col>
         <Col xs={10}>
