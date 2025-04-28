@@ -7,7 +7,7 @@ import { Container, Row, Col, Table, Alert } from 'react-bootstrap';
 import Pagination from '../components/Pagination';
 import '../styles/Reports.css';
 
-const Reports = () => {
+const Reports = ({ handleSignOut }) => {  // Added handleSignOut as a prop
   const [collapsed, setCollapsed] = useState(true);
   const [logs, setLogs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,7 +81,12 @@ const Reports = () => {
     <Container fluid className="reports-container">
       <Row>
         <Col xs={2}>
-          <Sidebar collapsed={collapsed} toggleSidebar={() => setCollapsed(!collapsed)} location={location} />
+          <Sidebar
+            collapsed={collapsed}
+            toggleSidebar={() => setCollapsed(!collapsed)}
+            location={location}
+            handleSignOut={handleSignOut}  // Pass handleSignOut to Sidebar
+          />
         </Col>
         <Col xs={10}>
           <div className="reports-content">

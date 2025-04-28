@@ -8,7 +8,7 @@ import Sidebar from '../components/Sidebar';
 import AddAssetModal from '../components/AddAssetModal';
 import '../styles/Import.css';
 
-const Import = () => {
+const Import = ({ handleSignOut }) => {  // Added handleSignOut as a prop
   const [collapsed, setCollapsed] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const location = useLocation();
@@ -113,7 +113,12 @@ const Import = () => {
 
   return (
     <div className="import-container-wrapper">
-      <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} location={location} />
+      <Sidebar 
+        collapsed={collapsed} 
+        toggleSidebar={toggleSidebar} 
+        location={location} 
+        handleSignOut={handleSignOut}  // Pass handleSignOut to Sidebar
+      />
       <div className={`import-content ${collapsed ? 'collapsed' : ''}`}>
         <div className="import-content-wrapper">
           <h2>Import Inventory Items</h2>

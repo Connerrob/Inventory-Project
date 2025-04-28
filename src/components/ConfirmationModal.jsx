@@ -1,19 +1,20 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import '../styles/Sidebar.css';
 
-const ConfirmationModal = ({ show, onHide, onConfirm, message }) => {
+const ConfirmationModal = ({ show, onClose, onConfirm }) => {
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Confirm Action</Modal.Title>
+        <Modal.Title>Are you sure?</Modal.Title>
       </Modal.Header>
-      <Modal.Body>{message}</Modal.Body>
+      <Modal.Body>
+        <p>Are you sure you want to proceed?</p>
+      </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
+        <Button variant="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant="danger" onClick={onConfirm}>
+        <Button variant="danger" onClick={onConfirm} >
           Confirm
         </Button>
       </Modal.Footer>

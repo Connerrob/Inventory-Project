@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc, deleteDoc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, addDoc, deleteDoc } from 'firebase/firestore';
 import Sidebar from '../components/Sidebar';
 import NavbarComponent from '../components/Navbar';
 import AssetTable from '../components/Table';
 import AddAssetModal from '../components/AddAssetModal';
+import EditAssetModal from '../components/EditAssetModal';
 import FilterModal from '../components/FilterModal';
 import { logAction } from '../utils';
 import Pagination from '../components/Pagination';
+import ConfirmationModal from '../components/ConfirmationModal'; // Import ConfirmationModal
 import '../styles/Dashboard.css';
 
-const Dashboard = () => {
+const Dashboard = ({ handleSignOut }) => {
   const [assets, setAssets] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,16 +23,15 @@ const Dashboard = () => {
   const [filterModalShow, setFilterModalShow] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [actionText, setActionText] = useState(''); 
 
   const location = useLocation();
 
   const initialAssetState = {
-    name: '',
-    category: '',
-    description: '',
-    quantity: '',
     serviceTag: '',
     model: '',
+    category: '',
     status: '',
     location: '',
     notes: '',
@@ -62,7 +63,12 @@ const Dashboard = () => {
     setSelectedAsset((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
+    setShowConfirmation(true); 
+    setActionText(selectedAsset.id ? 'save changes to' : 'add'); 
+  };
+
+  const handleConfirmSave = async () => {
     if (selectedAsset.id) {
       const assetRef = doc(db, 'assets', selectedAsset.id);
       const oldItem = assets.find((a) => a.id === selectedAsset.id);
@@ -83,18 +89,34 @@ const Dashboard = () => {
     }
 
     setShowModal(false);
+    setShowConfirmation(false);
   };
 
-  const handleDelete = async () => {
-    if (!selectedAsset?.id) return;
-    const assetRef = doc(db, 'assets', selectedAsset.id);
-
-    await logAction('delete', { ...selectedAsset });
-    await deleteDoc(assetRef);
-    setAssets((prev) => prev.filter((a) => a.id !== selectedAsset.id));
-
-    setShowModal(false);
+  const handleDelete = async (id) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+      return;
+    }
+  
+    const assetToDelete = assets.find((a) => a.id === id);
+  
+    if (!assetToDelete) {
+      console.error('Asset not found');
+      return;
+    }
+  
+    const assetRef = doc(db, 'assets', id);
+  
+    try {
+      await deleteDoc(assetRef);
+  
+      await logAction('delete', assetToDelete);
+  
+      setAssets((prevAssets) => prevAssets.filter((asset) => asset.id !== id));
+    } catch (error) {
+      console.error('Error deleting asset: ', error);
+    }
   };
+  
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -110,21 +132,16 @@ const Dashboard = () => {
     .filter((asset) => {
       if (searchQuery) {
         return Object.values(asset).some((value) =>
-          value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+          value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
       return true;
     })
     .filter((asset) => {
       return Object.keys(filters).every((key) => {
-        if (key === 'status' && filters[key]) {
-          return asset[key]?.toLowerCase() === filters[key].toLowerCase();
-        }
-
         if (filters[key] && asset[key]) {
           return asset[key]?.toLowerCase().includes(filters[key].toLowerCase());
         }
-
         return !filters[key] || !asset[key];
       });
     });
@@ -147,6 +164,7 @@ const Dashboard = () => {
             collapsed={collapsed}
             toggleSidebar={() => setCollapsed(!collapsed)}
             location={location}
+            handleSignOut={handleSignOut}
           />
         </Col>
         <Col xs={10}>
@@ -165,7 +183,10 @@ const Dashboard = () => {
               filters={filters}
             />
 
-            <Button className="filter-button" onClick={() => setFilterModalShow(true)}>
+            <Button
+              className="filter-button"
+              onClick={() => setFilterModalShow(true)}
+            >
               Filter
             </Button>
 
@@ -186,19 +207,35 @@ const Dashboard = () => {
             </Button>
           </div>
 
-          <AddAssetModal
-            show={showModal}
-            onHide={() => setShowModal(false)}
-            selectedAsset={selectedAsset}
-            onChange={handleChange}
-            onSave={handleSave}
-            onDelete={handleDelete}
-          />
+          {selectedAsset?.id ? (
+            <EditAssetModal
+              show={showModal}
+              onHide={() => setShowModal(false)}
+              selectedAsset={selectedAsset}
+              onChange={handleChange}
+              onSave={handleSave}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <AddAssetModal
+              show={showModal}
+              onHide={() => setShowModal(false)}
+              selectedAsset={selectedAsset}
+              onChange={handleChange}
+              onSave={handleSave}
+            />
+          )}
 
           <FilterModal
             show={filterModalShow}
             onHide={() => setFilterModalShow(false)}
             onFilter={handleFilter}
+          />
+
+          <ConfirmationModal
+            show={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={handleConfirmSave}
           />
         </Col>
       </Row>

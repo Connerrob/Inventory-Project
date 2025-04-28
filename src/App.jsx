@@ -20,26 +20,23 @@ function App() {
 
   const handleSignOut = () => {
     const auth = getAuth();
-    signOut(auth).then(() => {
-      setUser(null);
-    }).catch((error) => {
-      console.error('Sign out error:', error);
-    });
+    signOut(auth)
+      .then(() => {
+        setUser(null);
+      })
+      .catch((error) => {
+        console.error('Sign out error:', error);
+      });
   };
 
   return (
     <Router>
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LoginForm />} />
-
-        <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
-        <Route path="/reports" element={user ? <Reports /> : <Navigate to="/" />} />
-        <Route path="/import" element={user ? <Import /> : <Navigate to="/" />} />
+        <Route path="/dashboard" element={user ? <Dashboard handleSignOut={handleSignOut} /> : <Navigate to="/" />} />
+        <Route path="/reports" element={user ? <Reports handleSignOut={handleSignOut} /> : <Navigate to="/" />} />
+        <Route path="/import" element={user ? <Import handleSignOut={handleSignOut} /> : <Navigate to="/" />} />
       </Routes>
-
-      {user && (
-        <button onClick={handleSignOut}>Sign Out</button>
-      )}
     </Router>
   );
 }

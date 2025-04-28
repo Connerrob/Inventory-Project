@@ -16,6 +16,11 @@
   min-width: 220px;
 }
 
+/* Form Labels */
+.form-label {
+  font-weight: bold;
+}
+
 /* Modal footer */
 .modal-footer {
   background-color: var(--background);
@@ -65,3 +70,4 @@
 .modal-footer .btn-primary:hover {
   background-color: var(--button-hover);
 }
+
