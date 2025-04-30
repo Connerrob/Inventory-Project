@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
 import "../styles/LoginForm.css";
 
 const LoginForm = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -13,18 +12,17 @@ const LoginForm = () => {
 
   const navigate = useNavigate();
   const auth = getAuth();
-  const db = getFirestore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    if (!username || !password) {
-      setError("Please enter both username and password.");
+    if (!email || !password) {
+      setError("Please enter both email and password.");
       setLoading(false);
-      if (!username) {
-        document.getElementById("username").focus()
+      if (!email) {
+        document.getElementById("email").focus();
       } else {
         document.getElementById("password").focus();
       }
@@ -32,17 +30,6 @@ const LoginForm = () => {
     }
 
     try {
-      const userRef = doc(db, "users", username.toLowerCase());
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        setError("Username not found.");
-        setLoading(false);
-        document.getElementById("username").focus();
-        return;
-      }
-
-      const { email } = userSnap.data();
       await signInWithEmailAndPassword(auth, email, password);
       console.log("Login successful");
       navigate("/dashboard");
@@ -67,13 +54,13 @@ const LoginForm = () => {
       <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
         <div className="input-group">
           <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
             autoFocus
-            id="username"
-            className={error && !username ? "input-error" : ""}
+            id="email"
+            className={error && !email ? "input-error" : ""}
           />
         </div>
 
@@ -98,7 +85,11 @@ const LoginForm = () => {
 
         {error && <p className="error">{error}</p>}
 
-        <button type="submit" className="login-button" disabled={loading || !username || !password}>
+        <button
+          type="submit"
+          className="login-button"
+          disabled={loading || !email || !password}
+        >
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>

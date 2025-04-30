@@ -5,7 +5,7 @@
   --secondary: #555555;
   --button-hover: #5c5c5c;
   --border-color: #dddddd;
-  --accent: #4CAF50;
+  --accent: #4caf50;
 }
 
 .dashboard-container {
@@ -13,7 +13,7 @@
   padding-right: 12%;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background-color: var(--background);
 }
 
@@ -33,16 +33,16 @@
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  border-radius: 5px; 
-  border: 1px solid var(--text); 
+  border-radius: 5px;
+  border: 1px solid var(--text);
   font-size: 1rem;
-  background-color: var(--text); 
+  background-color: var(--text);
   color: #fff;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--accent); 
+  border-color: var(--accent);
 }
 
 .sidebar {
@@ -83,7 +83,8 @@
   color: var(--text);
 }
 
-.table-container th, .table-container td {
+.table-container th,
+.table-container td {
   padding: 12px 15px;
   border-bottom: 1px solid var(--border-color);
   text-align: left;
@@ -128,7 +129,6 @@
   background-color: #c0392b;
 }
 
-
 .modal-content {
   border-radius: 8px;
 }
@@ -162,8 +162,7 @@
 }
 
 .add-button {
-  margin-left: auto;
-  margin-top: 20px;
+  margin: 10px;
   padding: 10px 20px;
   font-size: 16px;
   background-color: var(--accent);
@@ -179,8 +178,6 @@
 }
 
 .filter-button {
-  margin-top: 15px;
-  margin-bottom: 20px;
   background-color: #007bff;
   color: white;
   border: none;
@@ -188,58 +185,13 @@
   font-size: 16px;
   cursor: pointer;
 }
-
-.filter-button:hover {
-  background-color: #0056b3;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.pagination button {
-  margin: 0 5px;
-  padding: 6px 14px;
-  border: 1px solid var(--border-color);
-  background-color: var(--background);
-  color: var(--text);
+.export-button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: var(--accent);
+  color: white;
+  border-radius: 6px;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  border-radius: 4px;
-}
-
-.pagination button.active-page {
-  background-color: var(--accent);
-  color: var(--text);
-  font-weight: bold;
-}
-
-.pagination button.page-number {
-  background-color: var(--background);
-  border: 1px solid var(--border-color);
-  padding: 8px 14px;
-  font-size: 1rem;
-  border-radius: 4px;
-  color: var(--text);
-  transition: background-color 0.3s ease;
-}
-
-.pagination button.page-number.active-page {
-  background-color: var(--accent);
-  color: var(--text);
-  font-weight: bold;
-}
-
-.pagination button.page-number:hover {
-  background-color: var(--primary);
-  color: var(--text);
-  transform: scale(1.05);
-}
-
-.pagination .ellipsis {
-  font-weight: bold;
-  color: var(--text);
-  margin: 0 10px;
 }

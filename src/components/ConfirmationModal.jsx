@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import React from "react";
+import { Modal, Button } from "react-bootstrap";
 
 const ConfirmationModal = ({ show, onClose, onConfirm }) => {
   return (
@@ -14,7 +14,7 @@ const ConfirmationModal = ({ show, onClose, onConfirm }) => {
         <Button variant="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant="danger" onClick={onConfirm} >
+        <Button variant="danger" onClick={onConfirm}>
           Confirm
         </Button>
       </Modal.Footer>

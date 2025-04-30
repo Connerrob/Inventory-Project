@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const handlePageChange = (page) => {
@@ -13,7 +13,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <>
           <button
             onClick={() => handlePageChange(1)}
-            className={currentPage === 1 ? 'active-page' : ''}
+            className={currentPage === 1 ? "active-page" : ""}
             aria-label="Go to first page"
           >
             1
@@ -33,18 +33,20 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
-                className={currentPage === page ? 'active-page' : ''}
+                className={currentPage === page ? "active-page" : ""}
                 aria-label={`Go to page ${page}`}
               >
                 {page}
               </button>
             ))}
 
-          {currentPage < totalPages - 5 && <span className="ellipsis">...</span>}
+          {currentPage < totalPages - 5 && (
+            <span className="ellipsis">...</span>
+          )}
 
           <button
             onClick={() => handlePageChange(totalPages)}
-            className={currentPage === totalPages ? 'active-page' : ''}
+            className={currentPage === totalPages ? "active-page" : ""}
             aria-label="Go to last page"
           >
             {totalPages}
@@ -55,7 +57,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           <button
             key={index}
             onClick={() => handlePageChange(index + 1)}
-            className={currentPage === index + 1 ? 'active-page' : ''}
+            className={currentPage === index + 1 ? "active-page" : ""}
             aria-label={`Go to page ${index + 1}`}
           >
             {index + 1}

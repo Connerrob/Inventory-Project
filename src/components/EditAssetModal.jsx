@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
-import ConfirmationModal from './ConfirmationModal';
-import '../styles/AddAssetModal.css';
+import React, { useState } from "react";
+import { Modal, Button, Form, Row, Col, Alert } from "react-bootstrap";
+import ConfirmationModal from "./ConfirmationModal";
+import "../styles/AddAssetModal.css";
 
 const EditAssetModal = ({
   show,
@@ -18,21 +18,19 @@ const EditAssetModal = ({
   const [errors, setErrors] = useState({});
 
   const requiredFields = [
-    'serviceTag',
-    'model',
-    'category',
-    'status',
-    'location',
-    'notes',
-    'macAddress',
-    'decal',
+    "partNumber",
+    "category",
+    "description",
+    "quantity",
+    "price",
+    "retail",
   ];
 
   const validateFields = () => {
     const validationErrors = {};
     requiredFields.forEach((field) => {
-      if (!selectedAsset?.[field]?.trim()) {
-        validationErrors[field] = 'This field is required';
+      if (!selectedAsset?.[field]?.toString().trim()) {
+        validationErrors[field] = "This field is required";
       }
     });
     return validationErrors;
@@ -47,7 +45,7 @@ const EditAssetModal = ({
 
     setErrors({});
     setActionType(action);
-    if (action === 'delete') {
+    if (action === "delete") {
       setShowConfirmation(true);
     } else {
       handleConfirmAction();
@@ -55,19 +53,17 @@ const EditAssetModal = ({
   };
 
   const handleConfirmAction = () => {
-    if (actionType === 'delete') {
-      onDelete(selectedAsset.id);
+    if (actionType === "delete") {
+      if (typeof onDelete === "function") {
+        onDelete(selectedAsset);
+      }
       setShowConfirmation(false);
-      onHide(); 
-    } else if (actionType === 'save') {
-      if (onSave) {
-        onSave(selectedAsset); 
-      }
-      onHide(); 
-    } else if (actionType === 'add') {
-      if (onAdd) {
-        onAdd(selectedAsset);
-      }
+      onHide();
+    } else if (actionType === "save") {
+      if (onSave) onSave(selectedAsset);
+      onHide();
+    } else if (actionType === "add") {
+      if (onAdd) onAdd(selectedAsset);
       onHide();
     }
   };
@@ -80,7 +76,7 @@ const EditAssetModal = ({
     <>
       <Modal show={show} onHide={onHide} centered size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>{isAdding ? 'Add New Asset' : 'Edit Asset'}</Modal.Title>
+          <Modal.Title>{isAdding ? "Add New Asset" : "Edit Asset"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {Object.keys(errors).length > 0 && (
@@ -97,48 +93,28 @@ const EditAssetModal = ({
           <Form>
             <Row>
               <Col md={6}>
-              <Form.Group controlId="formServiceTag" className="mb-3">
-                <Form.Label>Service Tag</Form.Label>
-                <Form.Control
-                type="text"
-                name="serviceTag"
-                value={selectedAsset?.serviceTag || ''}
-                onChange={onChange}
-                placeholder="Enter service tag"
-                isInvalid={!!errors.serviceTag}
-                disabled
-                />
-                <Form.Control.Feedback type="invalid">
-                    {errors.serviceTag}
-                    </Form.Control.Feedback>
-                    </Form.Group>
-
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formModel" className="mb-3">
-                  <Form.Label>Model</Form.Label>
+                <Form.Group controlId="formPartNumber" className="mb-3">
+                  <Form.Label>Part Number</Form.Label>
                   <Form.Control
                     type="text"
-                    name="model"
-                    value={selectedAsset?.model || ''}
+                    name="partNumber"
+                    value={selectedAsset?.partNumber || ""}
                     onChange={onChange}
-                    placeholder="Enter model"
-                    isInvalid={!!errors.model}
+                    placeholder="Enter part number"
+                    isInvalid={!!errors.partNumber}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {errors.model}
+                    {errors.partNumber}
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
-            </Row>
-            <Row>
               <Col md={6}>
                 <Form.Group controlId="formCategory" className="mb-3">
                   <Form.Label>Category</Form.Label>
                   <Form.Control
                     type="text"
                     name="category"
-                    value={selectedAsset?.category || ''}
+                    value={selectedAsset?.category || ""}
                     onChange={onChange}
                     placeholder="Enter category"
                     isInvalid={!!errors.category}
@@ -148,87 +124,75 @@ const EditAssetModal = ({
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
+            </Row>
+
+            <Row>
               <Col md={6}>
-                <Form.Group controlId="formStatus" className="mb-3">
-                  <Form.Label>Status</Form.Label>
+                <Form.Group controlId="formDescription" className="mb-3">
+                  <Form.Label>Description</Form.Label>
                   <Form.Control
                     type="text"
-                    name="status"
-                    value={selectedAsset?.status || ''}
+                    name="description"
+                    value={selectedAsset?.description || ""}
                     onChange={onChange}
-                    placeholder="Enter status"
-                    isInvalid={!!errors.status}
+                    placeholder="Enter description"
+                    isInvalid={!!errors.description}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {errors.status}
+                    {errors.description}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formQuantity" className="mb-3">
+                  <Form.Label>Quantity</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="quantity"
+                    value={selectedAsset?.quantity || ""}
+                    onChange={onChange}
+                    placeholder="Enter quantity"
+                    isInvalid={!!errors.quantity}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.quantity}
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
             </Row>
+
             <Row>
               <Col md={6}>
-                <Form.Group controlId="formLocation" className="mb-3">
-                  <Form.Label>Location</Form.Label>
+                <Form.Group controlId="formPrice" className="mb-3">
+                  <Form.Label>Price</Form.Label>
                   <Form.Control
-                    type="text"
-                    name="location"
-                    value={selectedAsset?.location || ''}
+                    type="number"
+                    step="0.01"
+                    name="price"
+                    value={selectedAsset?.price || ""}
                     onChange={onChange}
-                    placeholder="Enter location"
-                    isInvalid={!!errors.location}
+                    placeholder="Enter price"
+                    isInvalid={!!errors.price}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {errors.location}
+                    {errors.price}
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group controlId="formNotes" className="mb-3">
-                  <Form.Label>Notes</Form.Label>
+                <Form.Group controlId="formRetail" className="mb-3">
+                  <Form.Label>Retail</Form.Label>
                   <Form.Control
-                    type="text"
-                    name="notes"
-                    value={selectedAsset?.notes || ''}
+                    type="number"
+                    step="0.01"
+                    name="retail"
+                    value={selectedAsset?.retail || ""}
                     onChange={onChange}
-                    placeholder="Enter notes"
-                    isInvalid={!!errors.notes}
+                    placeholder="Enter retail value"
+                    isInvalid={!!errors.retail}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {errors.notes}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <Form.Group controlId="formMacAddress" className="mb-3">
-                  <Form.Label>MAC Address</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="macAddress"
-                    value={selectedAsset?.macAddress || ''}
-                    onChange={onChange}
-                    placeholder="Enter MAC address"
-                    isInvalid={!!errors.macAddress}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.macAddress}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formDecal" className="mb-3">
-                  <Form.Label>Decal</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="decal"
-                    value={selectedAsset?.decal || ''}
-                    onChange={onChange}
-                    placeholder="Enter decal"
-                    isInvalid={!!errors.decal}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.decal}
+                    {errors.retail}
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
@@ -241,15 +205,24 @@ const EditAssetModal = ({
             Cancel
           </Button>
           {isAdding ? (
-            <Button variant="primary" onClick={() => handleActionAttempt('add')}>
+            <Button
+              variant="primary"
+              onClick={() => handleActionAttempt("add")}
+            >
               Add Asset
             </Button>
           ) : (
             <>
-              <Button variant="danger" onClick={() => handleActionAttempt('delete')}>
+              <Button
+                variant="danger"
+                onClick={() => handleActionAttempt("delete")}
+              >
                 Delete Asset
               </Button>
-              <Button variant="success" onClick={() => handleActionAttempt('save')}>
+              <Button
+                variant="success"
+                onClick={() => handleActionAttempt("save")}
+              >
                 Save Changes
               </Button>
             </>

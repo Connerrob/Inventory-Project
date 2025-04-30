@@ -1,21 +1,26 @@
-import React, { useState } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
+import React, { useState } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
 
-const FilterModal = ({ show, onHide, onFilter }) => {
+const FilterModal = ({ show, onHide, onFilter, inventoryData }) => {
   const [filters, setFilters] = useState({
-    serviceTag: '',
-    model: '',
-    category: '',
-    status: '',
-    location: '',
-    notes: '',
-    macAddress: '',
-    decal: '',
+    partNumber: "",
+    category: "",
+    description: "",
+    quantity: "",
+    price: "",
+    retail: "",
   });
+
+  const [filteredData, setFilteredData] = useState(inventoryData || []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+
+    const newFilteredData = (inventoryData || []).filter(
+      (item) => item[name]?.toString().toLowerCase() === value.toLowerCase()
+    );
+    setFilteredData(newFilteredData);
   };
 
   const handleApplyFilters = () => {
@@ -25,15 +30,14 @@ const FilterModal = ({ show, onHide, onFilter }) => {
 
   const handleClearFilters = () => {
     setFilters({
-      serviceTag: '',
-      model: '',
-      category: '',
-      status: '',
-      location: '',
-      notes: '',
-      macAddress: '',
-      decal: '',
+      partNumber: "",
+      category: "",
+      description: "",
+      quantity: "",
+      price: "",
+      retail: "",
     });
+    setFilteredData(inventoryData || []);
   };
 
   return (
@@ -43,24 +47,22 @@ const FilterModal = ({ show, onHide, onFilter }) => {
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group controlId="serviceTag">
-            <Form.Label>Service Tag</Form.Label>
+          <Form.Group controlId="partNumber">
+            <Form.Label>Part Number</Form.Label>
             <Form.Control
               type="text"
-              name="serviceTag"
-              value={filters.serviceTag}
+              name="partNumber"
+              value={filters.partNumber}
               onChange={handleChange}
+              list="partNumberOptions"
             />
+            <datalist id="partNumberOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.partNumber} />
+              ))}
+            </datalist>
           </Form.Group>
-          <Form.Group controlId="model">
-            <Form.Label>Model</Form.Label>
-            <Form.Control
-              type="text"
-              name="model"
-              value={filters.model}
-              onChange={handleChange}
-            />
-          </Form.Group>
+
           <Form.Group controlId="category">
             <Form.Label>Category</Form.Label>
             <Form.Control
@@ -68,63 +70,88 @@ const FilterModal = ({ show, onHide, onFilter }) => {
               name="category"
               value={filters.category}
               onChange={handleChange}
+              list="categoryOptions"
             />
+            <datalist id="categoryOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.category} />
+              ))}
+            </datalist>
           </Form.Group>
-          <Form.Group controlId="status">
-            <Form.Label>Status</Form.Label>
+
+          <Form.Group controlId="description">
+            <Form.Label>Description</Form.Label>
             <Form.Control
               type="text"
-              name="status"
-              value={filters.status}
+              name="description"
+              value={filters.description}
               onChange={handleChange}
+              list="descriptionOptions"
             />
+            <datalist id="descriptionOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.description} />
+              ))}
+            </datalist>
           </Form.Group>
-          <Form.Group controlId="location">
-            <Form.Label>Location</Form.Label>
+
+          <Form.Group controlId="quantity">
+            <Form.Label>Quantity</Form.Label>
             <Form.Control
               type="text"
-              name="location"
-              value={filters.location}
+              name="quantity"
+              value={filters.quantity}
               onChange={handleChange}
+              list="quantityOptions"
             />
+            <datalist id="quantityOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.quantity} />
+              ))}
+            </datalist>
           </Form.Group>
-          <Form.Group controlId="notes">
-            <Form.Label>Notes</Form.Label>
+
+          <Form.Group controlId="price">
+            <Form.Label>Price</Form.Label>
             <Form.Control
               type="text"
-              name="notes"
-              value={filters.notes}
+              name="price"
+              value={filters.price}
               onChange={handleChange}
+              list="priceOptions"
             />
+            <datalist id="priceOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.price} />
+              ))}
+            </datalist>
           </Form.Group>
-          <Form.Group controlId="macAddress">
-            <Form.Label>MAC Address</Form.Label>
+
+          <Form.Group controlId="retail">
+            <Form.Label>Retail</Form.Label>
             <Form.Control
               type="text"
-              name="macAddress"
-              value={filters.macAddress}
+              name="retail"
+              value={filters.retail}
               onChange={handleChange}
+              list="retailOptions"
             />
-          </Form.Group>
-          <Form.Group controlId="decal">
-            <Form.Label>Decal</Form.Label>
-            <Form.Control
-              type="text"
-              name="decal"
-              value={filters.decal}
-              onChange={handleChange}
-            />
+            <datalist id="retailOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.retail} />
+              ))}
+            </datalist>
           </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide} aria-label="Close filter modal">
+        <Button variant="secondary" onClick={onHide}>
           Close
         </Button>
-        <Button variant="secondary" onClick={handleClearFilters} aria-label="Clear all filters">
+        <Button variant="secondary" onClick={handleClearFilters}>
           Clear Filters
         </Button>
-        <Button variant="primary" onClick={handleApplyFilters} aria-label="Apply selected filters">
+        <Button variant="primary" onClick={handleApplyFilters}>
           Apply Filters
         </Button>
       </Modal.Footer>

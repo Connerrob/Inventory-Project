@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
-import { db } from '../firebase'; 
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import '../styles/AddAssetModal.css';
+import React, { useState, useEffect } from "react";
+import { Modal, Button, Form, Row, Col, Alert } from "react-bootstrap";
+import { db } from "../firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import "../styles/AddAssetModal.css";
 
 const AddAssetModal = ({
   show,
@@ -14,35 +14,51 @@ const AddAssetModal = ({
   onAdd,
 }) => {
   const [errors, setErrors] = useState({});
-  const [isDuplicate, setIsDuplicate] = useState(false); 
+  const [isDuplicate, setIsDuplicate] = useState(false);
 
   const requiredFields = [
-    'serviceTag',
-    'model',
-    'category',
-    'status',
-    'location',
-    'notes',
-    'macAddress',
-    'decal',
+    "partNumber",
+    "category",
+    "description",
+    "quantity",
+    "price",
+    "retail",
   ];
+
+  const emptyAsset = {
+    partNumber: "",
+    category: "",
+    description: "",
+    quantity: "",
+    price: "",
+    retail: "",
+  };
+
+  useEffect(() => {
+    if (!show) {
+      setErrors({});
+      setIsDuplicate(false);
+      if (isAdding && onChange) {
+        onChange({ target: { name: "reset", value: emptyAsset } });
+      }
+    }
+  }, [show]);
 
   const validateFields = () => {
     const validationErrors = {};
     requiredFields.forEach((field) => {
-      if (!selectedAsset?.[field]?.trim()) {
-        validationErrors[field] = 'This field is required';
+      if (!selectedAsset?.[field]?.toString().trim()) {
+        validationErrors[field] = "This field is required";
       }
     });
     return validationErrors;
   };
 
-  const checkServiceTagUnique = async (serviceTag) => {
-    const assetsRef = collection(db, 'assets'); 
-    const q = query(assetsRef, where('serviceTag', '==', serviceTag));
+  const checkPartNumberUnique = async (partNumber) => {
+    const assetsRef = collection(db, "assets");
+    const q = query(assetsRef, where("partNumber", "==", partNumber));
     const querySnapshot = await getDocs(q);
-
-    return querySnapshot.empty; 
+    return querySnapshot.empty;
   };
 
   const handleActionAttempt = async (action) => {
@@ -53,8 +69,8 @@ const AddAssetModal = ({
     }
 
     setErrors({});
+    const isUnique = await checkPartNumberUnique(selectedAsset.partNumber);
 
-    const isUnique = await checkServiceTagUnique(selectedAsset.serviceTag);
     if (!isUnique) {
       setIsDuplicate(true);
       return;
@@ -62,36 +78,29 @@ const AddAssetModal = ({
       setIsDuplicate(false);
     }
 
-    if (action === 'save') {
-      handleConfirmAction('save');
-    } else if (action === 'add') {
-      handleConfirmAction('add');
-    }
+    handleConfirmAction(action);
   };
 
   const handleConfirmAction = (action) => {
-    if (action === 'save') {
-      if (onSave) {
-        onSave(selectedAsset);
-      }
-      onHide();
-    } else if (action === 'add') {
-      if (onAdd) {
-        onAdd(selectedAsset);
-      }
-      onHide();
+    if (action === "save" && onSave) {
+      onSave(selectedAsset);
+    } else if (action === "add" && onAdd) {
+      onAdd(selectedAsset);
     }
+    onHide();
   };
 
   return (
     <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>{isAdding ? 'Add New Asset' : 'Edit Asset'}</Modal.Title>
+        <Modal.Title>{isAdding ? "Add New Item" : "Edit Item"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {isDuplicate && (
           <Alert variant="danger">
-            <strong>The service tag already exists. Please use a unique service tag.</strong>
+            <strong>
+              The part number already exists. Please use a unique part number.
+            </strong>
           </Alert>
         )}
 
@@ -109,46 +118,28 @@ const AddAssetModal = ({
         <Form>
           <Row>
             <Col md={6}>
-              <Form.Group controlId="formServiceTag" className="mb-3">
-                <Form.Label>Service Tag</Form.Label>
+              <Form.Group controlId="formPartNumber" className="mb-3">
+                <Form.Label>Part Number</Form.Label>
                 <Form.Control
                   type="text"
-                  name="serviceTag"
-                  value={selectedAsset?.serviceTag || ''}
+                  name="partNumber"
+                  value={selectedAsset?.partNumber || ""}
                   onChange={onChange}
-                  placeholder="Enter service tag"
-                  isInvalid={!!errors.serviceTag}
+                  placeholder="Enter part number"
+                  isInvalid={!!errors.partNumber}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.serviceTag}
+                  {errors.partNumber}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
-            <Col md={6}>
-              <Form.Group controlId="formModel" className="mb-3">
-                <Form.Label>Model</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="model"
-                  value={selectedAsset?.model || ''}
-                  onChange={onChange}
-                  placeholder="Enter model"
-                  isInvalid={!!errors.model}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.model}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
             <Col md={6}>
               <Form.Group controlId="formCategory" className="mb-3">
                 <Form.Label>Category</Form.Label>
                 <Form.Control
                   type="text"
                   name="category"
-                  value={selectedAsset?.category || ''}
+                  value={selectedAsset?.category || ""}
                   onChange={onChange}
                   placeholder="Enter category"
                   isInvalid={!!errors.category}
@@ -158,87 +149,75 @@ const AddAssetModal = ({
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
+          </Row>
+
+          <Row>
             <Col md={6}>
-              <Form.Group controlId="formStatus" className="mb-3">
-                <Form.Label>Status</Form.Label>
+              <Form.Group controlId="formDescription" className="mb-3">
+                <Form.Label>Description</Form.Label>
                 <Form.Control
                   type="text"
-                  name="status"
-                  value={selectedAsset?.status || ''}
+                  name="description"
+                  value={selectedAsset?.description || ""}
                   onChange={onChange}
-                  placeholder="Enter status"
-                  isInvalid={!!errors.status}
+                  placeholder="Enter description"
+                  isInvalid={!!errors.description}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.status}
+                  {errors.description}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group controlId="formQuantity" className="mb-3">
+                <Form.Label>Quantity</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="quantity"
+                  value={selectedAsset?.quantity || ""}
+                  onChange={onChange}
+                  placeholder="Enter quantity"
+                  isInvalid={!!errors.quantity}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.quantity}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
+
           <Row>
             <Col md={6}>
-              <Form.Group controlId="formLocation" className="mb-3">
-                <Form.Label>Location</Form.Label>
+              <Form.Group controlId="formPrice" className="mb-3">
+                <Form.Label>Price</Form.Label>
                 <Form.Control
-                  type="text"
-                  name="location"
-                  value={selectedAsset?.location || ''}
+                  type="number"
+                  step="0.01"
+                  name="price"
+                  value={selectedAsset?.price || ""}
                   onChange={onChange}
-                  placeholder="Enter location"
-                  isInvalid={!!errors.location}
+                  placeholder="Enter price"
+                  isInvalid={!!errors.price}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.location}
+                  {errors.price}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col md={6}>
-              <Form.Group controlId="formNotes" className="mb-3">
-                <Form.Label>Notes</Form.Label>
+              <Form.Group controlId="formRetail" className="mb-3">
+                <Form.Label>Retail</Form.Label>
                 <Form.Control
-                  type="text"
-                  name="notes"
-                  value={selectedAsset?.notes || ''}
+                  type="number"
+                  step="0.01"
+                  name="retail"
+                  value={selectedAsset?.retail || ""}
                   onChange={onChange}
-                  placeholder="Enter notes"
-                  isInvalid={!!errors.notes}
+                  placeholder="Enter retail value"
+                  isInvalid={!!errors.retail}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.notes}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={6}>
-              <Form.Group controlId="formMacAddress" className="mb-3">
-                <Form.Label>MAC Address</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="macAddress"
-                  value={selectedAsset?.macAddress || ''}
-                  onChange={onChange}
-                  placeholder="Enter MAC address"
-                  isInvalid={!!errors.macAddress}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.macAddress}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group controlId="formDecal" className="mb-3">
-                <Form.Label>Decal</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="decal"
-                  value={selectedAsset?.decal || ''}
-                  onChange={onChange}
-                  placeholder="Enter decal"
-                  isInvalid={!!errors.decal}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.decal}
+                  {errors.retail}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -251,11 +230,11 @@ const AddAssetModal = ({
           Cancel
         </Button>
         {isAdding ? (
-          <Button variant="primary" onClick={() => handleActionAttempt('add')}>
-            Add Asset
+          <Button variant="primary" onClick={() => handleActionAttempt("add")}>
+            Add Item
           </Button>
         ) : (
-          <Button variant="success" onClick={() => handleActionAttempt('save')}>
+          <Button variant="success" onClick={() => handleActionAttempt("save")}>
             Save Changes
           </Button>
         )}

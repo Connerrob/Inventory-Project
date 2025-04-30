@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { db } from '../firebase';
-import { collection, addDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
-import { logAction } from '../utils';
-import Papa from 'papaparse';
-import Sidebar from '../components/Sidebar';
-import AddAssetModal from '../components/AddAssetModal';
-import ImportModal from '../components/ImportModal';
-import '../styles/Import.css';
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { db } from "../firebase";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  writeBatch,
+  doc,
+} from "firebase/firestore";
+import { logAction } from "../utils";
+import Papa from "papaparse";
+import Sidebar from "../components/Sidebar";
+import AddAssetModal from "../components/AddAssetModal";
+import ImportModal from "../components/ImportModal";
+import "../styles/Import.css";
 
 const Import = ({ handleSignOut }) => {
   const [collapsed, setCollapsed] = useState(true);
@@ -18,18 +25,26 @@ const Import = ({ handleSignOut }) => {
   const [loading, setLoading] = useState(false);
   const [importedCount, setImportedCount] = useState(0);
   const [updatedCount, setUpdatedCount] = useState(0);
+  const [errorMsg, setErrorMsg] = useState("");
   const location = useLocation();
 
   const toggleSidebar = () => setCollapsed(!collapsed);
 
   const downloadTemplate = () => {
-    const csvHeaders = ['Service Tag', 'Model', 'Category', 'Status', 'Location', 'Notes', 'Mac Address', 'Decal'];
-    const csvContent = [csvHeaders.join(',')].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const headers = [
+      "Part Number",
+      "Category",
+      "Description",
+      "Quantity",
+      "Price",
+      "Retail",
+    ];
+    const csvContent = [headers.join(",")].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', 'inventory_template.csv');
+    link.setAttribute("download", "inventory_template.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -38,15 +53,22 @@ const Import = ({ handleSignOut }) => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
+
+    if (!file.name.endsWith(".csv")) {
+      setErrorMsg("Only .csv files are allowed.");
+      return;
+    }
+
     setSelectedFile(file);
-    setShowImportModal(true); // Open confirmation
+    setShowImportModal(true);
+    setErrorMsg("");
   };
 
   const processFile = async () => {
     if (!selectedFile) return;
-  
+
     setLoading(true);
-  
+
     const reader = new FileReader();
     reader.onload = async (e) => {
       Papa.parse(e.target.result, {
@@ -54,102 +76,126 @@ const Import = ({ handleSignOut }) => {
         skipEmptyLines: true,
         complete: async (results) => {
           const parsedData = results.data;
-          const validItems = parsedData.filter(item =>
-            item['Service Tag'] && item['Model'] && item['Category'] && item['Status'] &&
-            item['Location'] && item['Notes'] && item['Mac Address'] && item['Decal']
+          const validItems = parsedData.filter(
+            (item) =>
+              item["Part Number"] &&
+              item["Category"] &&
+              item["Description"] &&
+              item["Quantity"] &&
+              item["Price"] &&
+              item["Retail"]
           );
-  
+
           let addedCount = 0;
           let updatedCount = 0;
-  
+
+          const batch = writeBatch(db);
+
           for (const item of validItems) {
-            const serviceTag = item['Service Tag'].trim();
-            const q = query(collection(db, 'assets'), where('serviceTag', '==', serviceTag));
+            const partNumber = item["Part Number"].trim();
+            const q = query(
+              collection(db, "assets"),
+              where("partNumber", "==", partNumber)
+            );
             const snapshot = await getDocs(q);
-  
+
             if (!snapshot.empty) {
               const docRef = snapshot.docs[0].ref;
               const existingItem = snapshot.docs[0].data();
-  
-              const hasChanged = (
-                existingItem.model !== item['Model'] ||
-                existingItem.category !== item['Category'] ||
-                existingItem.status !== item['Status'] ||
-                existingItem.location !== item['Location'] ||
-                existingItem.notes !== item['Notes'] ||
-                existingItem.macAddress !== item['Mac Address'] ||
-                existingItem.decal !== item['Decal']
-              );
-  
+
+              const hasChanged =
+                existingItem.category !== item["Category"] ||
+                existingItem.description !== item["Description"] ||
+                existingItem.quantity !== item["Quantity"] ||
+                existingItem.price !== item["Price"] ||
+                existingItem.retail !== item["Retail"];
+
               if (hasChanged) {
                 const updatedItem = {
-                  serviceTag,
-                  model: item['Model'],
-                  category: item['Category'],
-                  status: item['Status'],
-                  location: item['Location'],
-                  notes: item['Notes'],
-                  macAddress: item['Mac Address'],
-                  decal: item['Decal'],
+                  partNumber,
+                  category: item["Category"],
+                  description: item["Description"],
+                  quantity: item["Quantity"],
+                  price: item["Price"],
+                  retail: item["Retail"],
                 };
-                await updateDoc(docRef, updatedItem);
-                await logAction('edit', { oldItem: existingItem, newItem: updatedItem });
+                batch.update(docRef, updatedItem);
                 updatedCount++;
+                logAction("edit", {
+                  oldItem: existingItem,
+                  newItem: updatedItem,
+                });
               }
             } else {
               const newItem = {
-                serviceTag,
-                model: item['Model'],
-                category: item['Category'],
-                status: item['Status'],
-                location: item['Location'],
-                notes: item['Notes'],
-                macAddress: item['Mac Address'],
-                decal: item['Decal'],
+                partNumber,
+                category: item["Category"],
+                description: item["Description"],
+                quantity: item["Quantity"],
+                price: item["Price"],
+                retail: item["Retail"],
               };
-              await addDoc(collection(db, 'assets'), newItem);
-              await logAction('Imported', newItem);
+              const newDocRef = doc(collection(db, "assets"));
+              batch.set(newDocRef, newItem);
               addedCount++;
+              logAction("add", newItem);
             }
           }
-  
+
+          try {
+            await batch.commit();
+          } catch (error) {
+            console.error("Batch commit failed:", error);
+          }
+
           setImportedCount(addedCount);
-          setUpdatedCount(updatedCount); 
+          setUpdatedCount(updatedCount);
           setLoading(false);
           setIsSuccess(true);
-  
           setSelectedFile(null);
-          document.querySelector('.file-input').value = '';
-  
-        }
+          document.querySelector(".file-input").value = "";
+        },
       });
     };
-  
+
     reader.readAsText(selectedFile);
   };
-  
+
+  const resetModal = () => {
+    setShowImportModal(false);
+    setSelectedFile(null);
+    setIsSuccess(false);
+    setImportedCount(0);
+    setUpdatedCount(0);
+    setLoading(false);
+    setErrorMsg("");
+  };
 
   return (
     <div className="import-container-wrapper">
-      <Sidebar 
-        collapsed={collapsed} 
-        toggleSidebar={toggleSidebar} 
-        location={location} 
-        handleSignOut={handleSignOut} 
+      <Sidebar
+        collapsed={collapsed}
+        toggleSidebar={toggleSidebar}
+        location={location}
+        handleSignOut={handleSignOut}
       />
-      <div className={`import-content ${collapsed ? 'collapsed' : ''}`}>
+      <div className={`import-content ${collapsed ? "collapsed" : ""}`}>
         <div className="import-content-wrapper">
           <h2>Import Inventory Items</h2>
           <div className="file-upload-container">
-            <input 
-              type="file" 
-              accept=".csv" 
-              onChange={handleFileUpload} 
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
               className="file-input"
             />
             <p className="file-instruction">
-              Upload a CSV file with columns: <strong>Service Tag, Model, Category, Status, Location, Notes, Mac Address, Decal</strong>
+              Upload a CSV file with columns:{" "}
+              <strong>
+                Part Number, Category, Description, Quantity, Price, Retail
+              </strong>
             </p>
+            {errorMsg && <p className="error-text">{errorMsg}</p>}
           </div>
           <button onClick={downloadTemplate} className="download-template-btn">
             Download CSV Template
@@ -160,22 +206,18 @@ const Import = ({ handleSignOut }) => {
       <ImportModal
         show={showImportModal}
         onConfirm={processFile}
-        onCancel={() => { 
-          setShowImportModal(false); 
-          setSelectedFile(null); 
-          setIsSuccess(false); 
-          setImportedCount(0);
-          setUpdatedCount(0);
-          setLoading(false);
-        }}
-        fileName={selectedFile?.name || ''}
+        onCancel={resetModal}
+        fileName={selectedFile?.name || ""}
         loading={loading}
         isSuccess={isSuccess}
         importedCount={importedCount}
         updatedCount={updatedCount}
       />
 
-      <AddAssetModal showModal={showModal} closeModal={() => setShowModal(false)} />
+      <AddAssetModal
+        showModal={showModal}
+        closeModal={() => setShowModal(false)}
+      />
     </div>
   );
 };

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { getDocs, collection } from 'firebase/firestore';
-import { useLocation } from 'react-router-dom';
-import { db } from '../firebase';
-import Sidebar from '../components/Sidebar';
-import { Container, Row, Col, Table, Alert } from 'react-bootstrap';
-import Pagination from '../components/Pagination';
-import '../styles/Reports.css';
+import React, { useEffect, useState } from "react";
+import { getDocs, collection } from "firebase/firestore";
+import { useLocation } from "react-router-dom";
+import { db } from "../firebase";
+import Sidebar from "../components/Sidebar";
+import { Container, Row, Col, Table, Alert } from "react-bootstrap";
+import Pagination from "../components/Pagination";
+import "../styles/Reports.css";
 
-const Reports = ({ handleSignOut }) => { 
+const Reports = ({ handleSignOut }) => {
   const [collapsed, setCollapsed] = useState(true);
   const [logs, setLogs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,12 +18,12 @@ const Reports = ({ handleSignOut }) => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const logsSnapshot = await getDocs(collection(db, 'assetLogs'));
+        const logsSnapshot = await getDocs(collection(db, "assetLogs"));
         const logsList = [];
 
         for (const doc of logsSnapshot.docs) {
           const logData = doc.data();
-          const userDoc = logData.user ? logData.user : 'Unknown';
+          const userDoc = logData.user ? logData.user : "Unknown";
 
           logsList.push({
             id: doc.id,
@@ -36,7 +36,7 @@ const Reports = ({ handleSignOut }) => {
 
         setLogs(logsList);
       } catch (error) {
-        console.error('Error fetching logs:', error);
+        console.error("Error fetching logs:", error);
       }
     };
 
@@ -44,26 +44,22 @@ const Reports = ({ handleSignOut }) => {
   }, []);
 
   const formatTimestamp = (timestamp) => {
-    if (!timestamp || typeof timestamp.toDate !== 'function') return 'Invalid Date';
+    if (!timestamp || typeof timestamp.toDate !== "function")
+      return "Invalid Date";
     return timestamp.toDate().toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
+      dateStyle: "medium",
+      timeStyle: "short",
     });
   };
 
   const formatFieldName = (field) => {
     const fieldNames = {
-      serviceTag: 'Service Tag',
-      model: 'Model',
-      status: 'Status',
-      location: 'Location',
-      notes: 'Notes',
-      macAddress: 'MAC Address',
-      name: 'Item Name',
-      category: 'Category',
-      description: 'Description',
-      quantity: 'Quantity',
-      decal: 'Decal',
+      partNumber: "Part Number",
+      category: "Category",
+      description: "Description",
+      quantity: "Quantity",
+      price: "Price",
+      retail: "Retail",
     };
     return fieldNames[field] || field;
   };
@@ -92,7 +88,9 @@ const Reports = ({ handleSignOut }) => {
           <div className="reports-content">
             <h2 className="section-title">Activity Logs</h2>
             {logs.length === 0 ? (
-              <Alert variant="info">No activity logged yet. Check back later!</Alert>
+              <Alert variant="info">
+                No activity logged yet. Check back later!
+              </Alert>
             ) : (
               <>
                 <Table striped bordered hover className="styled-table">
@@ -109,22 +107,23 @@ const Reports = ({ handleSignOut }) => {
                     {currentLogs.map((log, index) => (
                       <tr key={index}>
                         <td>{log.actionType}</td>
-                        <td>{log.assetName || log.serviceTag || 'Unknown'}</td>
+                        <td>{log.assetName || log.serviceTag || "Unknown"}</td>
                         <td>
-                          {log.changes && Object.keys(log.changes).length > 0 ? (
-                            Object.entries(log.changes).map(([field, change], i) => (
-                              <div key={i} className="change-item">
-                                <strong>{formatFieldName(field)}:</strong> {change.from} → {change.to}
-                              </div>
-                            ))
-                          ) : log.changes === null ? (
-                            'No changes'
-                          ) : (
-                            'No changes recorded'
-                          )}
+                          {log.changes && Object.keys(log.changes).length > 0
+                            ? Object.entries(log.changes).map(
+                                ([field, change], i) => (
+                                  <div key={i} className="change-item">
+                                    <strong>{formatFieldName(field)}:</strong>{" "}
+                                    {change.from} → {change.to}
+                                  </div>
+                                )
+                              )
+                            : log.changes === null
+                            ? "No changes"
+                            : "No changes recorded"}
                         </td>
                         <td>{formatTimestamp(log.timestamp)}</td>
-                        <td>{log.user || 'Unknown'}</td>
+                        <td>{log.user || "Unknown"}</td>
                       </tr>
                     ))}
                   </tbody>
