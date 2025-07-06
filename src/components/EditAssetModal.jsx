@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Row, Col, Alert } from "react-bootstrap";
-import ConfirmationModal from "./ConfirmationModal"; // Modal for confirming delete action
+import ConfirmationModal from "./ConfirmationModal";
 import "../styles/AddAssetModal.css";
 
 const EditAssetModal = ({

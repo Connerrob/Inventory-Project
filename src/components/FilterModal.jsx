@@ -1,255 +1,162 @@
 import React, { useState } from "react";
-import { Modal, Button, Form, Row, Col, Alert } from "react-bootstrap";
-import ConfirmationModal from "./ConfirmationModal";
-import "../styles/AddAssetModal.css";
+import { Modal, Button, Form } from "react-bootstrap";
 
-// This modal handles both editing and adding assets
-const EditAssetModal = ({
-  show,
-  onHide,
-  selectedAsset,
-  isAdding,
-  onChange,
-  onSave,
-  onAdd,
-  onDelete,
-}) => {
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [actionType, setActionType] = useState(null);
-  const [errors, setErrors] = useState({});
+const FilterModal = ({ show, onHide, onFilter, inventoryData }) => {
+  const [filters, setFilters] = useState({
+    partNumber: "",
+    category: "",
+    description: "",
+    quantity: "",
+    price: "",
+    retail: "",
+  });
 
-  const requiredFields = [
-    "partNumber",
-    "category",
-    "description",
-    "quantity",
-    "price",
-    "retail",
-  ];
+  const [filteredData, setFilteredData] = useState(inventoryData || []);
 
-  // Check for empty required fields
-  const validateFields = () => {
-    const validationErrors = {};
-    requiredFields.forEach((field) => {
-      if (!selectedAsset?.[field]?.toString().trim()) {
-        validationErrors[field] = "This field is required";
-      }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+
+    const newFilteredData = (inventoryData || []).filter(
+      (item) => item[name]?.toString().toLowerCase() === value.toLowerCase()
+    );
+    setFilteredData(newFilteredData);
+  };
+
+  const handleApplyFilters = () => {
+    onFilter(filters);
+    onHide();
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      partNumber: "",
+      category: "",
+      description: "",
+      quantity: "",
+      price: "",
+      retail: "",
     });
-    return validationErrors;
-  };
-
-  // Handle save, add, or delete attempt
-  const handleActionAttempt = (action) => {
-    const validationErrors = validateFields();
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setErrors({});
-    setActionType(action);
-
-    if (action === "delete") {
-      setShowConfirmation(true);
-    } else {
-      handleConfirmAction();
-    }
-  };
-
-  // Confirm and perform action
-  const handleConfirmAction = () => {
-    if (actionType === "delete") {
-      if (typeof onDelete === "function") {
-        onDelete(selectedAsset);
-      }
-      setShowConfirmation(false);
-      onHide();
-    } else if (actionType === "save") {
-      if (onSave) onSave(selectedAsset);
-      onHide();
-    } else if (actionType === "add") {
-      if (onAdd) onAdd(selectedAsset);
-      onHide();
-    }
-  };
-
-  const handleCancelAction = () => {
-    setShowConfirmation(false);
+    setFilteredData(inventoryData || []);
   };
 
   return (
-    <>
-      <Modal show={show} onHide={onHide} centered size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{isAdding ? "Add New Asset" : "Edit Asset"}</Modal.Title>
-        </Modal.Header>
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Advanced Filter</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          <Form.Group controlId="partNumber">
+            <Form.Label>Part Number</Form.Label>
+            <Form.Control
+              type="text"
+              name="partNumber"
+              value={filters.partNumber}
+              onChange={handleChange}
+              list="partNumberOptions"
+            />
+            <datalist id="partNumberOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.partNumber} />
+              ))}
+            </datalist>
+          </Form.Group>
 
-        <Modal.Body>
-          {Object.keys(errors).length > 0 && (
-            <Alert variant="danger">
-              <strong>Please fix the following errors:</strong>
-              <ul>
-                {Object.keys(errors).map((field) => (
-                  <li key={field}>{errors[field]}</li>
-                ))}
-              </ul>
-            </Alert>
-          )}
+          <Form.Group controlId="category">
+            <Form.Label>Category</Form.Label>
+            <Form.Control
+              type="text"
+              name="category"
+              value={filters.category}
+              onChange={handleChange}
+              list="categoryOptions"
+            />
+            <datalist id="categoryOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.category} />
+              ))}
+            </datalist>
+          </Form.Group>
 
-          <Form>
-            {/* Row 1: Part Number and Category */}
-            <Row>
-              <Col md={6}>
-                <Form.Group controlId="formPartNumber" className="mb-3">
-                  <Form.Label>Part Number</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="partNumber"
-                    value={selectedAsset?.partNumber || ""}
-                    onChange={onChange}
-                    placeholder="Enter part number"
-                    isInvalid={!!errors.partNumber}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.partNumber}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formCategory" className="mb-3">
-                  <Form.Label>Category</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="category"
-                    value={selectedAsset?.category || ""}
-                    onChange={onChange}
-                    placeholder="Enter category"
-                    isInvalid={!!errors.category}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.category}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
+          <Form.Group controlId="description">
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              type="text"
+              name="description"
+              value={filters.description}
+              onChange={handleChange}
+              list="descriptionOptions"
+            />
+            <datalist id="descriptionOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.description} />
+              ))}
+            </datalist>
+          </Form.Group>
 
-            {/* Row 2: Description and Quantity */}
-            <Row>
-              <Col md={6}>
-                <Form.Group controlId="formDescription" className="mb-3">
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="description"
-                    value={selectedAsset?.description || ""}
-                    onChange={onChange}
-                    placeholder="Enter description"
-                    isInvalid={!!errors.description}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.description}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formQuantity" className="mb-3">
-                  <Form.Label>Quantity</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="quantity"
-                    value={selectedAsset?.quantity || ""}
-                    onChange={onChange}
-                    placeholder="Enter quantity"
-                    isInvalid={!!errors.quantity}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.quantity}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
+          <Form.Group controlId="quantity">
+            <Form.Label>Quantity</Form.Label>
+            <Form.Control
+              type="text"
+              name="quantity"
+              value={filters.quantity}
+              onChange={handleChange}
+              list="quantityOptions"
+            />
+            <datalist id="quantityOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.quantity} />
+              ))}
+            </datalist>
+          </Form.Group>
 
-            {/* Row 3: Price and Retail */}
-            <Row>
-              <Col md={6}>
-                <Form.Group controlId="formPrice" className="mb-3">
-                  <Form.Label>Price</Form.Label>
-                  <Form.Control
-                    type="number"
-                    step="0.01"
-                    name="price"
-                    value={selectedAsset?.price || ""}
-                    onChange={onChange}
-                    placeholder="Enter price"
-                    isInvalid={!!errors.price}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.price}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formRetail" className="mb-3">
-                  <Form.Label>Retail</Form.Label>
-                  <Form.Control
-                    type="number"
-                    step="0.01"
-                    name="retail"
-                    value={selectedAsset?.retail || ""}
-                    onChange={onChange}
-                    placeholder="Enter retail value"
-                    isInvalid={!!errors.retail}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.retail}
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
-          </Form>
-        </Modal.Body>
+          <Form.Group controlId="price">
+            <Form.Label>Price</Form.Label>
+            <Form.Control
+              type="text"
+              name="price"
+              value={filters.price}
+              onChange={handleChange}
+              list="priceOptions"
+            />
+            <datalist id="priceOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.price} />
+              ))}
+            </datalist>
+          </Form.Group>
 
-        <Modal.Footer className="d-flex justify-content-end">
-          <Button variant="secondary" onClick={onHide} className="me-2">
-            Cancel
-          </Button>
-
-          {isAdding ? (
-            <Button
-              variant="primary"
-              onClick={() => handleActionAttempt("add")}
-            >
-              Add Asset
-            </Button>
-          ) : (
-            <>
-              <Button
-                variant="danger"
-                onClick={() => handleActionAttempt("delete")}
-              >
-                Delete Asset
-              </Button>
-              <Button
-                variant="success"
-                onClick={() => handleActionAttempt("save")}
-              >
-                Save Changes
-              </Button>
-            </>
-          )}
-        </Modal.Footer>
-      </Modal>
-
-      {/* Delete confirmation modal */}
-      <ConfirmationModal
-        show={showConfirmation}
-        onClose={handleCancelAction}
-        onConfirm={handleConfirmAction}
-        actionType={actionType}
-      />
-    </>
+          <Form.Group controlId="retail">
+            <Form.Label>Retail</Form.Label>
+            <Form.Control
+              type="text"
+              name="retail"
+              value={filters.retail}
+              onChange={handleChange}
+              list="retailOptions"
+            />
+            <datalist id="retailOptions">
+              {(filteredData || []).map((item, index) => (
+                <option key={index} value={item.retail} />
+              ))}
+            </datalist>
+          </Form.Group>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide}>
+          Close
+        </Button>
+        <Button variant="secondary" onClick={handleClearFilters}>
+          Clear Filters
+        </Button>
+        <Button variant="primary" onClick={handleApplyFilters}>
+          Apply Filters
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
 
-export default EditAssetModal;
+export default FilterModal;
