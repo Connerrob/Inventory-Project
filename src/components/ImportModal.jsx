@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/import.css";
 
+//for displaying modal during CSV import
 const ImportModal = ({
   show,
   onConfirm,
@@ -26,6 +27,7 @@ const ImportModal = ({
 
         <div className="modal-body">
           {loading ? (
+            // Show progress indicator during loading
             <>
               <p className="modal-message">
                 Importing <strong>{fileName}</strong>...
@@ -35,6 +37,7 @@ const ImportModal = ({
               </div>
             </>
           ) : isSuccess ? (
+            // Show success message if import is done
             <>
               <p className="modal-message success">
                 Import completed successfully!
@@ -45,6 +48,7 @@ const ImportModal = ({
               </p>
             </>
           ) : (
+            // confirmation message before importing
             <>
               <p className="modal-message confirm">
                 Are you sure you want to import <strong>{fileName}</strong> into
@@ -57,10 +61,12 @@ const ImportModal = ({
         {!loading && (
           <div className="modal-footer">
             {isSuccess ? (
+              // Show close button after success
               <button className="modal-btn primary" onClick={onCancel}>
                 Close
               </button>
             ) : (
+              // Show confirmation buttons
               <>
                 <button className="modal-btn primary" onClick={onConfirm}>
                   Yes, Import

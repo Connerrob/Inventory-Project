@@ -30,6 +30,7 @@ const Import = ({ handleSignOut }) => {
 
   const toggleSidebar = () => setCollapsed(!collapsed);
 
+  // Trigger CSV download of a template file with correct headers
   const downloadTemplate = () => {
     const headers = [
       "Part Number",
@@ -50,6 +51,7 @@ const Import = ({ handleSignOut }) => {
     document.body.removeChild(link);
   };
 
+  // Handle file upload input and validate file type
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -64,6 +66,7 @@ const Import = ({ handleSignOut }) => {
     setErrorMsg("");
   };
 
+  // Process CSV, then write new or updated items to Firestore
   const processFile = async () => {
     if (!selectedFile) return;
 
@@ -76,6 +79,8 @@ const Import = ({ handleSignOut }) => {
         skipEmptyLines: true,
         complete: async (results) => {
           const parsedData = results.data;
+
+          // Filter out rows missing required fields
           const validItems = parsedData.filter(
             (item) =>
               item["Part Number"] &&
@@ -88,7 +93,6 @@ const Import = ({ handleSignOut }) => {
 
           let addedCount = 0;
           let updatedCount = 0;
-
           const batch = writeBatch(db);
 
           for (const item of validItems) {
@@ -100,6 +104,7 @@ const Import = ({ handleSignOut }) => {
             const snapshot = await getDocs(q);
 
             if (!snapshot.empty) {
+              // check if any values have changed
               const docRef = snapshot.docs[0].ref;
               const existingItem = snapshot.docs[0].data();
 
@@ -127,6 +132,7 @@ const Import = ({ handleSignOut }) => {
                 });
               }
             } else {
+              // New item add it to Firestore
               const newItem = {
                 partNumber,
                 category: item["Category"],
@@ -148,6 +154,7 @@ const Import = ({ handleSignOut }) => {
             console.error("Batch commit failed:", error);
           }
 
+          // Update UI state after successful import
           setImportedCount(addedCount);
           setUpdatedCount(updatedCount);
           setLoading(false);
@@ -161,6 +168,7 @@ const Import = ({ handleSignOut }) => {
     reader.readAsText(selectedFile);
   };
 
+  // Reset modal state for new import session
   const resetModal = () => {
     setShowImportModal(false);
     setSelectedFile(null);
@@ -179,10 +187,12 @@ const Import = ({ handleSignOut }) => {
         location={location}
         handleSignOut={handleSignOut}
       />
+
       <div className={`import-content ${collapsed ? "collapsed" : ""}`}>
         <div className="import-content-wrapper">
           <h2>Import Inventory Items</h2>
           <div className="file-upload-container">
+            {/* File upload input */}
             <input
               type="file"
               accept=".csv"
@@ -197,12 +207,15 @@ const Import = ({ handleSignOut }) => {
             </p>
             {errorMsg && <p className="error-text">{errorMsg}</p>}
           </div>
+
+          {/* Button to download CSV template */}
           <button onClick={downloadTemplate} className="download-template-btn">
             Download CSV Template
           </button>
         </div>
       </div>
 
+      {/* Modal to confirm import */}
       <ImportModal
         show={showImportModal}
         onConfirm={processFile}
@@ -214,6 +227,7 @@ const Import = ({ handleSignOut }) => {
         updatedCount={updatedCount}
       />
 
+      {/* Modal to manually add asset */}
       <AddAssetModal
         showModal={showModal}
         closeModal={() => setShowModal(false)}

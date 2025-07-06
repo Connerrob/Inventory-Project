@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Row, Col, Alert } from "react-bootstrap";
-import ConfirmationModal from "./ConfirmationModal";
+import ConfirmationModal from "./ConfirmationModal"; // Modal for confirming delete action
 import "../styles/AddAssetModal.css";
 
 const EditAssetModal = ({
@@ -17,6 +17,7 @@ const EditAssetModal = ({
   const [actionType, setActionType] = useState(null);
   const [errors, setErrors] = useState({});
 
+  // Fields required to be filled before submit
   const requiredFields = [
     "partNumber",
     "category",
@@ -26,6 +27,7 @@ const EditAssetModal = ({
     "retail",
   ];
 
+  // confirms that required fields are filled
   const validateFields = () => {
     const validationErrors = {};
     requiredFields.forEach((field) => {
@@ -36,8 +38,10 @@ const EditAssetModal = ({
     return validationErrors;
   };
 
+  // Called when user clicks "Save", "Add", or "Delete"
   const handleActionAttempt = (action) => {
     const validationErrors = validateFields();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -45,6 +49,8 @@ const EditAssetModal = ({
 
     setErrors({});
     setActionType(action);
+
+    // Show confirmation only for delete
     if (action === "delete") {
       setShowConfirmation(true);
     } else {
@@ -52,6 +58,7 @@ const EditAssetModal = ({
     }
   };
 
+  // Called when user confirms an action
   const handleConfirmAction = () => {
     if (actionType === "delete") {
       if (typeof onDelete === "function") {
@@ -68,6 +75,7 @@ const EditAssetModal = ({
     }
   };
 
+  // Called when user cancels delete confirmation
   const handleCancelAction = () => {
     setShowConfirmation(false);
   };
@@ -78,6 +86,7 @@ const EditAssetModal = ({
         <Modal.Header closeButton>
           <Modal.Title>{isAdding ? "Add New Asset" : "Edit Asset"}</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           {Object.keys(errors).length > 0 && (
             <Alert variant="danger">
@@ -91,6 +100,7 @@ const EditAssetModal = ({
           )}
 
           <Form>
+            {/* Row 1: Part Number and Category */}
             <Row>
               <Col md={6}>
                 <Form.Group controlId="formPartNumber" className="mb-3">
@@ -126,6 +136,7 @@ const EditAssetModal = ({
               </Col>
             </Row>
 
+            {/* Row 2: Description and Quantity */}
             <Row>
               <Col md={6}>
                 <Form.Group controlId="formDescription" className="mb-3">
@@ -161,6 +172,7 @@ const EditAssetModal = ({
               </Col>
             </Row>
 
+            {/* Row 3: Price and Retail */}
             <Row>
               <Col md={6}>
                 <Form.Group controlId="formPrice" className="mb-3">
@@ -204,6 +216,8 @@ const EditAssetModal = ({
           <Button variant="secondary" onClick={onHide} className="me-2">
             Cancel
           </Button>
+
+          {/* Show different buttons depending on if we're adding or editing */}
           {isAdding ? (
             <Button
               variant="primary"
@@ -230,6 +244,7 @@ const EditAssetModal = ({
         </Modal.Footer>
       </Modal>
 
+      {/* Confirmation modal appears only for delete */}
       <ConfirmationModal
         show={showConfirmation}
         onClose={handleCancelAction}

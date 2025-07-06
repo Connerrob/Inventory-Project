@@ -4,6 +4,7 @@ import { db } from "../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import "../styles/AddAssetModal.css";
 
+// AddAssetModal handles both adding and editing assets through a modal form
 const AddAssetModal = ({
   show,
   onHide,
@@ -13,9 +14,11 @@ const AddAssetModal = ({
   onSave,
   onAdd,
 }) => {
+  // Local state for form validation errors and duplicate check
   const [errors, setErrors] = useState({});
   const [isDuplicate, setIsDuplicate] = useState(false);
 
+  // Fields that must be filled in to submit
   const requiredFields = [
     "partNumber",
     "category",
@@ -25,6 +28,7 @@ const AddAssetModal = ({
     "retail",
   ];
 
+  // clearing the form
   const emptyAsset = {
     partNumber: "",
     category: "",
@@ -34,16 +38,19 @@ const AddAssetModal = ({
     retail: "",
   };
 
+  // Reset state when modal is closed
   useEffect(() => {
     if (!show) {
       setErrors({});
       setIsDuplicate(false);
       if (isAdding && onChange) {
+        // Reset fields if you are adding a new asset
         onChange({ target: { name: "reset", value: emptyAsset } });
       }
     }
   }, [show]);
 
+  // Validate that all required fields are filled in
   const validateFields = () => {
     const validationErrors = {};
     requiredFields.forEach((field) => {
@@ -54,6 +61,7 @@ const AddAssetModal = ({
     return validationErrors;
   };
 
+  // Check if the part number already exists in the database
   const checkPartNumberUnique = async (partNumber) => {
     const assetsRef = collection(db, "assets");
     const q = query(assetsRef, where("partNumber", "==", partNumber));
@@ -61,33 +69,37 @@ const AddAssetModal = ({
     return querySnapshot.empty;
   };
 
+  // Validate input and check for duplicate part number before submitting
   const handleActionAttempt = async (action) => {
     const validationErrors = validateFields();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    setErrors({});
+    setErrors({}); // Clear previous errors
+
     const isUnique = await checkPartNumberUnique(selectedAsset.partNumber);
 
     if (!isUnique) {
-      setIsDuplicate(true);
+      setIsDuplicate(true); // Show duplicate warning
       return;
     } else {
       setIsDuplicate(false);
     }
 
-    handleConfirmAction(action);
+    handleConfirmAction(action); // Proceed to add or save
   };
 
+  // Perform action add or save the asset
   const handleConfirmAction = (action) => {
     if (action === "save" && onSave) {
       onSave(selectedAsset);
     } else if (action === "add" && onAdd) {
       onAdd(selectedAsset);
     }
-    onHide();
+    onHide(); // Close the modal afterward
   };
 
   return (
@@ -95,7 +107,9 @@ const AddAssetModal = ({
       <Modal.Header closeButton>
         <Modal.Title>{isAdding ? "Add New Item" : "Edit Item"}</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
+        {/* Duplicate part number alert */}
         {isDuplicate && (
           <Alert variant="danger">
             <strong>
@@ -115,6 +129,7 @@ const AddAssetModal = ({
           </Alert>
         )}
 
+        {/* Asset Table */}
         <Form>
           <Row>
             <Col md={6}>
@@ -133,6 +148,7 @@ const AddAssetModal = ({
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
+
             <Col md={6}>
               <Form.Group controlId="formCategory" className="mb-3">
                 <Form.Label>Category</Form.Label>
@@ -150,7 +166,6 @@ const AddAssetModal = ({
               </Form.Group>
             </Col>
           </Row>
-
           <Row>
             <Col md={6}>
               <Form.Group controlId="formDescription" className="mb-3">
@@ -168,6 +183,7 @@ const AddAssetModal = ({
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
+
             <Col md={6}>
               <Form.Group controlId="formQuantity" className="mb-3">
                 <Form.Label>Quantity</Form.Label>
@@ -204,6 +220,7 @@ const AddAssetModal = ({
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
+
             <Col md={6}>
               <Form.Group controlId="formRetail" className="mb-3">
                 <Form.Label>Retail</Form.Label>
@@ -225,6 +242,7 @@ const AddAssetModal = ({
         </Form>
       </Modal.Body>
 
+      {/* Modal action buttons */}
       <Modal.Footer className="d-flex justify-content-end">
         <Button variant="secondary" onClick={onHide} className="me-2">
           Cancel

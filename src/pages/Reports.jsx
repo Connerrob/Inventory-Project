@@ -9,7 +9,9 @@ import "../styles/Reports.css";
 
 const Reports = ({ handleSignOut }) => {
   const [collapsed, setCollapsed] = useState(true);
+
   const [logs, setLogs] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const logsPerPage = 10;
 
@@ -32,6 +34,7 @@ const Reports = ({ handleSignOut }) => {
           });
         }
 
+        // Sort logs by timestamp
         logsList.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
 
         setLogs(logsList);
@@ -43,6 +46,7 @@ const Reports = ({ handleSignOut }) => {
     fetchLogs();
   }, []);
 
+  // Format timestamp for display
   const formatTimestamp = (timestamp) => {
     if (!timestamp || typeof timestamp.toDate !== "function")
       return "Invalid Date";
@@ -84,15 +88,18 @@ const Reports = ({ handleSignOut }) => {
             handleSignOut={handleSignOut}
           />
         </Col>
+
         <Col xs={10}>
           <div className="reports-content">
             <h2 className="section-title">Activity Logs</h2>
+
             {logs.length === 0 ? (
               <Alert variant="info">
                 No activity logged yet. Check back later!
               </Alert>
             ) : (
               <>
+                {/* Logs table */}
                 <Table striped bordered hover className="styled-table">
                   <thead>
                     <tr>
@@ -129,6 +136,7 @@ const Reports = ({ handleSignOut }) => {
                   </tbody>
                 </Table>
 
+                {/* Pagination controls */}
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}

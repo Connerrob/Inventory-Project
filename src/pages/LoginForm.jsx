@@ -6,11 +6,13 @@ import "../styles/LoginForm.css";
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+
   const auth = getAuth();
 
   const handleSubmit = async (e) => {
@@ -21,6 +23,8 @@ const LoginForm = () => {
     if (!email || !password) {
       setError("Please enter both email and password.");
       setLoading(false);
+
+      // Focus the empty input field to guide user
       if (!email) {
         document.getElementById("email").focus();
       } else {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { db } from "../firebase";
 import {
   collection,
   getDocs,
@@ -10,17 +9,22 @@ import {
   addDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { db } from "../firebase";
+
 import Sidebar from "../components/Sidebar";
 import NavbarComponent from "../components/Navbar";
 import AssetTable from "../components/Table";
 import AddAssetModal from "../components/AddAssetModal";
 import EditAssetModal from "../components/EditAssetModal";
 import FilterModal from "../components/FilterModal";
-import { logAction } from "../utils";
 import ConfirmationModal from "../components/ConfirmationModal";
+import { logAction } from "../utils";
+
 import "../styles/Dashboard.css";
 
 const Dashboard = ({ handleSignOut }) => {
+  const location = useLocation();
+
   const [assets, setAssets] = useState([]);
   const [filteredAssets, setFilteredAssets] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -33,8 +37,6 @@ const Dashboard = ({ handleSignOut }) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [deleteAssetId, setDeleteAssetId] = useState(null);
 
-  const location = useLocation();
-
   const initialAssetState = {
     partNumber: "",
     category: "",
@@ -44,18 +46,51 @@ const Dashboard = ({ handleSignOut }) => {
     retail: "",
   };
 
+  // Fetch assets
   useEffect(() => {
     const fetchAssets = async () => {
-      const querySnapshot = await getDocs(collection(db, "assets"));
-      const assetsList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setAssets(assetsList);
-      setFilteredAssets(assetsList);
+      const snapshot = await getDocs(collection(db, "assets"));
+      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setAssets(list);
+      setFilteredAssets(list);
     };
     fetchAssets();
   }, []);
+
+  // Update filtered assets when search/filter/sort changes
+  useEffect(() => {
+    const filtered = assets
+      .filter((asset) => {
+        if (searchQuery) {
+          return Object.values(asset).some((value) =>
+            value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+        return true;
+      })
+      .filter((asset) =>
+        Object.entries(filters).every(([key, value]) => {
+          if (!value) return true;
+          return asset[key]?.toString().toLowerCase() === value.toLowerCase();
+        })
+      )
+      .sort((a, b) => {
+        if (!sortConfig.key) return 0;
+        const aValue = (a[sortConfig.key] ?? "").toString();
+        const bValue = (b[sortConfig.key] ?? "").toString();
+        return sortConfig.direction === "asc"
+          ? aValue.localeCompare(bValue, undefined, {
+              numeric: true,
+              sensitivity: "base",
+            })
+          : bValue.localeCompare(aValue, undefined, {
+              numeric: true,
+              sensitivity: "base",
+            });
+      });
+
+    setFilteredAssets(filtered);
+  }, [assets, searchQuery, filters, sortConfig]);
 
   const handleEditClick = (asset) => {
     setSelectedAsset(asset);
@@ -78,98 +113,46 @@ const Dashboard = ({ handleSignOut }) => {
 
   const handleConfirmSave = async () => {
     if (selectedAsset.id) {
-      const assetRef = doc(db, "assets", selectedAsset.id);
+      const ref = doc(db, "assets", selectedAsset.id);
       const oldItem = assets.find((a) => a.id === selectedAsset.id);
-
-      await updateDoc(assetRef, selectedAsset);
+      await updateDoc(ref, selectedAsset);
       setAssets((prev) =>
         prev.map((a) => (a.id === selectedAsset.id ? selectedAsset : a))
       );
-
       await logAction("edit", { oldItem, newItem: selectedAsset });
     } else {
-      const docRef = await addDoc(collection(db, "assets"), selectedAsset);
-      const newAsset = { ...selectedAsset, id: docRef.id };
-
+      const ref = await addDoc(collection(db, "assets"), selectedAsset);
+      const newAsset = { ...selectedAsset, id: ref.id };
       setAssets((prev) => [...prev, newAsset]);
-
       await logAction("add", newAsset);
     }
-
     setShowModal(false);
     setShowConfirmation(false);
   };
+
   const handleConfirmDelete = async (assetToDelete) => {
-    const idToDelete = assetToDelete?.id || deleteAssetId;
-    if (idToDelete) {
-      const assetRef = doc(db, "assets", idToDelete);
-      const oldItem = assets.find((a) => a.id === idToDelete);
+    const id = assetToDelete?.id || deleteAssetId?.id;
+    if (!id) return;
 
-      await deleteDoc(assetRef);
-      await logAction("delete", oldItem);
+    const ref = doc(db, "assets", id);
+    const oldItem = assets.find((a) => a.id === id);
+    await deleteDoc(ref);
+    await logAction("delete", oldItem);
 
-      setAssets((prev) => prev.filter((asset) => asset.id !== idToDelete));
-      setDeleteAssetId(null);
-      setShowConfirmation(false);
-      setShowModal(false);
-      console.log("Asset deleted successfully");
-    }
+    setAssets((prev) => prev.filter((a) => a.id !== id));
+    setDeleteAssetId(null);
+    setShowModal(false);
+    setShowConfirmation(false);
   };
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleFilter = (filters) => {
-    setFilters(filters);
-  };
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+  const handleFilter = (filters) => setFilters(filters);
 
   const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-
+    const direction =
+      sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
     setSortConfig({ key, direction });
   };
-
-  const getFilteredSortedAssets = () => {
-    return assets
-      .filter((asset) => {
-        if (searchQuery) {
-          return Object.values(asset).some((value) =>
-            value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
-        return true;
-      })
-      .filter((asset) => {
-        return Object.entries(filters).every(([key, value]) => {
-          if (!value) return true;
-          return asset[key]?.toString().toLowerCase() === value.toLowerCase();
-        });
-      })
-      .sort((a, b) => {
-        if (sortConfig.key) {
-          const aValue = (a[sortConfig.key] ?? "").toString();
-          const bValue = (b[sortConfig.key] ?? "").toString();
-          return sortConfig.direction === "asc"
-            ? aValue.localeCompare(bValue, undefined, {
-                numeric: true,
-                sensitivity: "base",
-              })
-            : bValue.localeCompare(aValue, undefined, {
-                numeric: true,
-                sensitivity: "base",
-              });
-        }
-        return 0;
-      });
-  };
-
-  useEffect(() => {
-    setFilteredAssets(getFilteredSortedAssets());
-  }, [assets, searchQuery, filters, sortConfig]);
 
   const exportToCSV = () => {
     const headers = [
@@ -180,7 +163,6 @@ const Dashboard = ({ handleSignOut }) => {
       "Price",
       "Retail",
     ];
-
     const rows = filteredAssets.map((asset) => [
       asset.partNumber,
       asset.category,
@@ -192,12 +174,11 @@ const Dashboard = ({ handleSignOut }) => {
 
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      [headers, ...rows].map((e) => e.join(",")).join("\n");
+      [headers, ...rows].map((row) => row.join(",")).join("\n");
 
-    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "assets_export.csv");
+    link.href = encodeURI(csvContent);
+    link.download = "assets_export.csv";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

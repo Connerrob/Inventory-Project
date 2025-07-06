@@ -34,6 +34,7 @@ const AssetTable = ({
     })
     .filter((asset) => asset._score > 0 || searchQuery === "");
 
+  // Sort the scored assets by relevance and then by selected column
   const sortedAssets = [...scoredAssets].sort((a, b) => {
     if (b._score !== a._score) return b._score - a._score;
 
@@ -53,6 +54,7 @@ const AssetTable = ({
         });
   });
 
+  // Handle column sort click
   const handleSort = (key) => {
     let direction = "asc";
     if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -61,11 +63,13 @@ const AssetTable = ({
     setSortConfig({ key, direction });
   };
 
+  // Get sort arrow indicator for the column
   const getSortIndicator = (key) => {
     if (sortConfig.key !== key) return "";
     return sortConfig.direction === "asc" ? " ↑" : " ↓";
   };
 
+  // Render the asset table
   return (
     <Table striped bordered hover>
       <thead>
