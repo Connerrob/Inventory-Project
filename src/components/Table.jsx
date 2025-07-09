@@ -34,7 +34,7 @@ const AssetTable = ({
     })
     .filter((asset) => asset._score > 0 || searchQuery === "");
 
-  // Sort the scored assets by relevance and then by selected column
+  // Sort the assets by relevance and then by selected column
   const sortedAssets = [...scoredAssets].sort((a, b) => {
     if (b._score !== a._score) return b._score - a._score;
 
